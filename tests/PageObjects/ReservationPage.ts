@@ -124,6 +124,8 @@ export class ReservationPagePO {
         return '50' + String(randomNum);
     }
 
+    dateClass = this.page.locator('.form__input-date');
+
     public get startDateInput() {
         return this.page.getByTestId('form-start-date');
     }
@@ -131,6 +133,10 @@ export class ReservationPagePO {
     public async enterStartDate(day: string) {
         await this.startDateInput.click();
         await this.datePicker.selectDay(day);
+    }
+
+    public async expectStartDateErrorMessageToBe(errorMessage: string) {
+        return expect(this.dateClass.first()).toContainText(errorMessage);
     }
 
     public get endDateInput() {
@@ -177,8 +183,18 @@ export class ReservationPagePO {
     }
 
     public async expectSelectedTimeToBe(startHour: string, endHour: string) {
-        await expect(this.startTimeInput).toHaveValue(`${startHour}:00`);
-        await expect(this.endTimeInput).toHaveValue(`${endHour}:00`);
+
+        if(startHour.length === 1) {
+            await expect(this.startTimeInput).toHaveValue(`0${startHour}:00`);
+        }  else {
+            await expect(this.startTimeInput).toHaveValue(`${startHour}:00`);
+        }
+
+        if(endHour.length === 1) {
+            await expect(this.endTimeInput).toHaveValue(`0${endHour}:00`);
+        } else {
+            await expect(this.endTimeInput).toHaveValue(`${endHour}:00`);
+        }
     }
 
     public get agreementCheckbox() {
@@ -205,19 +221,27 @@ export class ReservationPagePO {
         await this.submitAndCashPaymentButton.click();
     }
 
-    public async getTomorrowDate() {
-
-        const today = new Date();
-        const tomorrow = new Date(today);
-
-        tomorrow.setDate(today.getDate() +1);
-        const tomorrowSubstring = tomorrow.toISOString().substring(8, 10);
-
-        return tomorrowSubstring;
-    }
-
     public get successfulReservationAlert() {
         return this.page.getByTestId('successful-reservation');
     }
-}
 
+    public async getSpecificDate(dayName: "yesterday" | "today" | "tomorrow" | "day after tomorrow") {
+
+        const dayNameToNumberMap = {
+            "yesterday": -1,
+            "today": 0,
+            "tomorrow": 1,
+            "day after tomorrow": 2
+        }
+
+        const today = new Date();
+        const newDate = new Date(today);
+
+        newDate.setDate(today.getDate() + dayNameToNumberMap[dayName]);
+        return newDate.toISOString().substring(8, 10);
+    }
+
+    public async generateRandomHour() {
+        return Math.floor(Math.random() * 24);
+    }
+}

@@ -9,6 +9,7 @@ export class BookingConfirmationPagePO {
     }
 
     public async expectEnteredNumberToBeVisible(phoneNumber: string) {
+        await expect(this.verifyPhoneNumberInput).toBeVisible();
         await expect(this.verifyPhoneNumberInput).toHaveValue(phoneNumber);
     }
 
