@@ -244,4 +244,8 @@ export class ReservationPagePO {
     public async generateRandomHour() {
         return Math.floor(Math.random() * 24);
     }
+
+    public async expectEndDateErrorMessageToBe(errorMessage: string) {
+        await expect(this.dateClass.last()).toContainText(errorMessage);
+    }
 }
