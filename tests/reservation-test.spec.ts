@@ -66,7 +66,7 @@ test.describe('Cash reservation tests', async () => {
         });
     });
 
-    test('Unsuccessful reservation of the date from the past', async () => {
+    test('Unsuccessful reservation of the date from the past', async ({page}) => {
 
         const reservation = {
             bandName: 'Hope',
@@ -78,6 +78,7 @@ test.describe('Cash reservation tests', async () => {
 
         await test.step('Fill inputs with correct data', async() => {
             await pages.reservationPage.selectRehearsalRoom(roomsName.num1);
+            await page.pause();
             await pages.reservationPage.selectReservationType(reservationType.records);
             await pages.reservationPage.enterBandName(reservation.bandName);
             await pages.reservationPage.enterPhoneNumber(generated.phoneNum);
@@ -90,5 +91,28 @@ test.describe('Cash reservation tests', async () => {
             await pages.reservationPage.submitAndSelectCashPayment();
             await pages.reservationPage.expectStartDateErrorMessageToBe(lateReservationErrorMessage);
         });
+    });
+
+    test('Unsuccessful reservation with an end-hour that is earlier than the start-hour', async() => {
+
+        const bandName = 'heloł world';
+        const date = await pages.reservationPage.getSpecificDate('tomorrow');
+        const endHour = generated.startHour -1;
+        const endHourErrorMessage = 'Próba nie może się skończyć przed rozpoczęciem :) .';
+
+         await test.step('Fill the inputs with correct data', async() => {
+            await pages.reservationPage.selectRehearsalRoom(roomsName.num1);
+            await pages.reservationPage.selectReservationType(reservationType.band);
+            await pages.reservationPage.enterBandName(bandName);
+            await pages.reservationPage.enterPhoneNumber(generated.phoneNum);
+            await pages.reservationPage.enterReservationDate(date);
+         });
+
+         await test.step('After entering an end-hour that is earlier than the start-hour, error message should be visible', async() => {
+            await pages.reservationPage.selectReservationTime(String(generated.startHour), String(endHour));
+            await pages.reservationPage.selectAgreementCheckbox();
+            await pages.reservationPage.submitAndSelectOnlinePayment();
+            await pages.reservationPage.expectEndDateErrorMessageToBe(endHourErrorMessage);
+         });
     });
 });
