@@ -5,6 +5,6 @@ export class DatePicker {
     }
 
     public async selectDay(day: string) {
-        await this.page.getByRole('button', {name: `${day}`}).click();
+        await this.page.getByRole('button', {name: `${day}`, exact: true}).click();
     }
 }

@@ -63,6 +63,10 @@ export class ReservationPagePO {
         }
     }
 
+    public get rehearsalRoomElement() {
+        return this.page.getByTestId('form-room');
+    }
+
     public async selectRehearsalRoom(roomName: 'Wszystkie' | 'Browar Miesczanski' | 'Stary Mlyn') {
 
         const roomNameToNumberMap = {
@@ -70,7 +74,7 @@ export class ReservationPagePO {
             'Stary Mlyn': '2'
         }
 
-        await this.page.locator('[id^="undefined-undefined-Sala-"] button').click();
+        await this.rehearsalRoomElement.locator('button').click();
         await expect(this.page.getByRole('menu')).toBeVisible();
 
         if(roomName === 'Wszystkie') {
@@ -78,6 +82,14 @@ export class ReservationPagePO {
         } else {
             await this.page.getByTestId(`form-room-${roomNameToNumberMap[roomName]}`).click();
         }
+    }
+
+    public async expectRehearsalRoomErrorMessageToBe(errorMessage: string) {
+        await expect(this.rehearsalRoomElement).toContainText(errorMessage);
+    }
+
+    public get reservationTypeButton() {
+        return this.page.locator('[id^="undefined-undefined-Typrezerwacji-"] button');
     }
 
     public async selectReservationType(typeName: 'Wybierz...' | 'Zespol' | 'Solo' | 'Nagrywka') {
@@ -88,14 +100,20 @@ export class ReservationPagePO {
             'Nagrywka': '2'
         }
 
-        await this.page.locator('[id^="undefined-undefined-Typrezerwacji-"]').click();
+        await this.reservationTypeButton.click();
         await expect(this.page.getByRole('menu')).toBeVisible();
 
         if(typeName === 'Wybierz...') {
             await this.page.getByRole('menuitem', {name: 'Wybierz...'}).click();
         } else {
-            await this.page.getByTestId(`form-reservation-type-${typeNameToNumberMap[typeName]}`).click();
+           await this.page.getByTestId(this.reservationTypeIdSelector + `-${typeNameToNumberMap[typeName]}`).click();
         }
+    }
+
+    reservationTypeIdSelector = 'form-reservation-type';
+
+    public async expectReservationTypeErrorMessageToBe(errorMessage: string) {
+        await expect(this.page.getByTestId(this.reservationTypeIdSelector)).toContainText(errorMessage);
     }
 
     public get bandNameInput() {
@@ -238,11 +256,11 @@ export class ReservationPagePO {
         const newDate = new Date(today);
 
         newDate.setDate(today.getDate() + dayNameToNumberMap[dayName]);
-        return newDate.toISOString().substring(8, 10);
+        return String(newDate.getDate());
     }
 
     public async generateRandomHour() {
-        return Math.floor(Math.random() * 24);
+        return Math.floor(Math.random() * 22);
     }
 
     public async expectEndDateErrorMessageToBe(errorMessage: string) {
