@@ -37,9 +37,8 @@ test.describe('Cash reservation tests', async () => {
         const reservation = {
             bandName: 'Chleb i Kawa',
             date: await pages.reservationPage.getSpecificDate("day after tomorrow"),
+            endHour: generated.startHour + 1,
         } as const;
-
-        const endHour = generated.startHour + 1;
 
         await test.step('Fill the form with correct data', async () => {
             await pages.reservationPage.selectRehearsalRoom(roomsName.num2);
@@ -48,8 +47,8 @@ test.describe('Cash reservation tests', async () => {
             await pages.reservationPage.enterBandName(reservation.bandName);
             await pages.reservationPage.enterPhoneNumber(generated.phoneNum);
             await pages.reservationPage.enterReservationDate(reservation.date);
-            await pages.reservationPage.selectReservationTime(String(generated.startHour), String(endHour));
-            await pages.reservationPage.expectSelectedTimeToBe(String(generated.startHour), String(endHour));
+            await pages.reservationPage.selectReservationTime(String(generated.startHour), String(reservation.endHour));
+            await pages.reservationPage.expectSelectedTimeToBe(String(generated.startHour), String(reservation.endHour));
         });
 
         await test.step('Select the checkbox and send the form', async () => {
@@ -66,7 +65,7 @@ test.describe('Cash reservation tests', async () => {
         });
     });
 
-    test('Unsuccessful reservation of the date from the past', async ({page}) => {
+    test('Unsuccessful reservation of the date from the past', async () => {
 
         const reservation = {
             bandName: 'Hope',
@@ -78,7 +77,6 @@ test.describe('Cash reservation tests', async () => {
 
         await test.step('Fill inputs with correct data', async () => {
             await pages.reservationPage.selectRehearsalRoom(roomsName.num1);
-            await page.pause();
             await pages.reservationPage.selectReservationType(reservationType.records);
             await pages.reservationPage.enterBandName(reservation.bandName);
             await pages.reservationPage.enterPhoneNumber(generated.phoneNum);
@@ -95,21 +93,24 @@ test.describe('Cash reservation tests', async () => {
 
     test('Unsuccessful reservation with an end-hour that is earlier than the start-hour', async () => {
 
-        const bandName = 'heloł world';
-        const date = await pages.reservationPage.getSpecificDate('tomorrow');
-        const endHour = generated.startHour - 1;
+        const reservation = {
+            bandName: 'heloł world',
+            date: await pages.reservationPage.getSpecificDate('tomorrow'),
+            endHour: generated.startHour - 1,
+        } as const;
+
         const endHourErrorMessage = 'Próba nie może się skończyć przed rozpoczęciem :) .';
 
         await test.step('Fill the inputs with correct data', async () => {
             await pages.reservationPage.selectRehearsalRoom(roomsName.num1);
             await pages.reservationPage.selectReservationType(reservationType.band);
-            await pages.reservationPage.enterBandName(bandName);
+            await pages.reservationPage.enterBandName(reservation.bandName);
             await pages.reservationPage.enterPhoneNumber(generated.phoneNum);
-            await pages.reservationPage.enterReservationDate(date);
+            await pages.reservationPage.enterReservationDate(reservation.date);
         });
 
         await test.step('After entering an end-hour that is earlier than the start-hour, error message should be visible', async () => {
-            await pages.reservationPage.selectReservationTime(String(generated.startHour), String(endHour));
+            await pages.reservationPage.selectReservationTime(String(generated.startHour), String(reservation.endHour));
             await pages.reservationPage.selectAgreementCheckbox();
             await pages.reservationPage.submitAndSelectOnlinePayment();
             await pages.reservationPage.expectEndDateErrorMessageToBe(endHourErrorMessage);
@@ -118,23 +119,83 @@ test.describe('Cash reservation tests', async () => {
 
     test('Unsuccessful reservation when start-hour and end-hour are the same', async () => {
 
-        const bandName = 'Kwiaty i krzewy';
-        const date = await pages.reservationPage.getSpecificDate('tomorrow');
+        const reservation = {
+            bandName: 'Kwiaty i krzewy',
+            date: await pages.reservationPage.getSpecificDate('tomorrow'),
+            endHour: generated.startHour,
+        } as const;
+
         const hourErrorMessage = 'Próba nie może się skończyć przed rozpoczęciem :) .';
 
         await test.step('Fill the inputs with correct data', async() => {
             await pages.reservationPage.selectRehearsalRoom(roomsName.num1);
             await pages.reservationPage.selectReservationType(reservationType.records);
-            await pages.reservationPage.enterBandName(bandName);
+            await pages.reservationPage.enterBandName(reservation.bandName);
             await pages.reservationPage.enterPhoneNumber(generated.phoneNum);
-            await pages.reservationPage.enterReservationDate(date);
+            await pages.reservationPage.enterReservationDate(reservation.date);
         });
 
         await test.step('After entering the same start and end-hour, error message should be visible', async() => {
-            await pages.reservationPage.selectReservationTime(String(generated.startHour), String(generated.startHour));
+            await pages.reservationPage.selectReservationTime(String(generated.startHour), String(reservation.endHour));
             await pages.reservationPage.selectAgreementCheckbox();
             await pages.reservationPage.submitAndSelectCashPayment();
             await pages.reservationPage.expectEndDateErrorMessageToBe(hourErrorMessage);
+        });
+    });
+
+    test('Unsuccessful reservation when no room is selected', async() => {
+
+        const reservation = {
+            bandName: 'stokrotka',
+            date: await pages.reservationPage.getSpecificDate('tomorrow'),
+            endHour: generated.startHour + 2,
+        } as const;
+
+        const roomErrorMessage = 'Pole jest wymagane';
+        const reservationTypeErrorMessage = 'Pole type jest wymagane.';
+
+        await test.step('When no specific room is selected, the reservation type selection should be disabled', async() => {
+            await pages.reservationPage.selectRehearsalRoom(roomsName.all);
+            await expect(pages.reservationPage.reservationTypeButton).toBeDisabled();
+        });
+
+        await test.step('Fill the rest of the form with correct data', async() => {
+            await pages.reservationPage.enterBandName(reservation.bandName);
+            await pages.reservationPage.enterPhoneNumber(generated.phoneNum);
+            await pages.reservationPage.enterReservationDate(reservation.date);
+            await pages.reservationPage.selectReservationTime(String(generated.startHour), String(reservation.endHour));
+            await pages.reservationPage.selectAgreementCheckbox();
+            await pages.reservationPage.submitAndSelectCashPayment();
+        });
+
+        await test.step('Unsuccessful reservation - both validation messages should be visible', async() => {
+            await pages.reservationPage.expectRehearsalRoomErrorMessageToBe(roomErrorMessage);
+            await pages.reservationPage.expectReservationTypeErrorMessageToBe(reservationTypeErrorMessage);
+        });
+    });
+
+    test('Unsuccessful reservation when reservation type is not selected', async() => {
+
+        const reservation = {
+            bandName: 'Fiołki',
+            date: await pages.reservationPage.getSpecificDate('day after tomorrow'),
+            endHour: generated.startHour + 3,
+        } as const;
+
+        const reservationTypeErrorMessage = 'Pole type jest wymagane.';
+
+        await test.step('Fill the form - except the reservation type field - with correct data', async() => {
+            await pages.reservationPage.selectRehearsalRoom(roomsName.num1);
+            await pages.reservationPage.enterBandName(reservation.bandName);
+            await pages.reservationPage.enterPhoneNumber(generated.phoneNum);
+            await pages.reservationPage.enterReservationDate(reservation.date);
+            await pages.reservationPage.selectReservationTime(String(generated.startHour), String(reservation.endHour))
+            await pages.reservationPage.selectAgreementCheckbox();
+            await pages.reservationPage.submitAndSelectOnlinePayment();
+        });
+
+        await test.step('Unsuccessful reservation - the reservation type validation message should be visible', async() => {
+            await pages.reservationPage.expectReservationTypeErrorMessageToBe(reservationTypeErrorMessage);
         });
     });
 });
