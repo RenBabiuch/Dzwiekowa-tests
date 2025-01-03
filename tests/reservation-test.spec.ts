@@ -53,13 +53,14 @@ test.describe('Cash reservation tests', async () => {
 
         await test.step('Select the checkbox and send the form', async () => {
             await pages.reservationPage.selectAgreementCheckbox();
-            await pages.reservationPage.submitAndSelectCashPayment();
+            await pages.reservationPage.submitWithCashPayment();
         });
 
         await test.step('After entering correct reservation code - the reservation should be created properly', async () => {
             await pages.bookingConfirmationPage.expectEnteredNumberToBeVisible(generated.phoneNum);
             await pages.bookingConfirmationPage.enterUserReservationCode();
             await pages.bookingConfirmationPage.confirmReservation();
+            // todo - extend the test to validate if reservation appears at the calendar properly
             await expect(pages.reservationPage.successfulReservationAlert).toBeVisible();
             await expect(pages.reservationPage.successfulReservationAlert).toHaveText(successfulMessage);
         });
@@ -86,7 +87,7 @@ test.describe('Cash reservation tests', async () => {
             await pages.reservationPage.enterReservationDate(reservation.date);
             await pages.reservationPage.selectReservationTime(String(generated.startHour), String(reservation.endHour));
             await pages.reservationPage.selectAgreementCheckbox();
-            await pages.reservationPage.submitAndSelectCashPayment();
+            await pages.reservationPage.submitWithCashPayment();
             await pages.reservationPage.expectStartDateErrorMessageToBe(lateReservationErrorMessage);
         });
     });
@@ -112,7 +113,7 @@ test.describe('Cash reservation tests', async () => {
         await test.step('After entering an end-hour that is earlier than the start-hour, error message should be visible', async () => {
             await pages.reservationPage.selectReservationTime(String(generated.startHour), String(reservation.endHour));
             await pages.reservationPage.selectAgreementCheckbox();
-            await pages.reservationPage.submitAndSelectOnlinePayment();
+            await pages.reservationPage.submitWithOnlinePayment();
             await pages.reservationPage.expectEndDateErrorMessageToBe(endHourErrorMessage);
         });
     });
@@ -138,7 +139,7 @@ test.describe('Cash reservation tests', async () => {
         await test.step('After entering the same start and end-hour, error message should be visible', async() => {
             await pages.reservationPage.selectReservationTime(String(generated.startHour), String(reservation.endHour));
             await pages.reservationPage.selectAgreementCheckbox();
-            await pages.reservationPage.submitAndSelectCashPayment();
+            await pages.reservationPage.submitWithCashPayment();
             await pages.reservationPage.expectEndDateErrorMessageToBe(hourErrorMessage);
         });
     });
@@ -165,7 +166,7 @@ test.describe('Cash reservation tests', async () => {
             await pages.reservationPage.enterReservationDate(reservation.date);
             await pages.reservationPage.selectReservationTime(String(generated.startHour), String(reservation.endHour));
             await pages.reservationPage.selectAgreementCheckbox();
-            await pages.reservationPage.submitAndSelectCashPayment();
+            await pages.reservationPage.submitWithCashPayment();
         });
 
         await test.step('Unsuccessful reservation - both validation messages should be visible', async() => {
@@ -191,7 +192,7 @@ test.describe('Cash reservation tests', async () => {
             await pages.reservationPage.enterReservationDate(reservation.date);
             await pages.reservationPage.selectReservationTime(String(generated.startHour), String(reservation.endHour))
             await pages.reservationPage.selectAgreementCheckbox();
-            await pages.reservationPage.submitAndSelectOnlinePayment();
+            await pages.reservationPage.submitWithOnlinePayment();
         });
 
         await test.step('Unsuccessful reservation - the reservation type validation message should be visible', async() => {

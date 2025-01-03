@@ -17,9 +17,7 @@ export class BookingConfirmationPagePO {
         return this.page.getByTestId('form-verify-reservation-code')
     }
 
-    public async enterUserReservationCode() {
-        const defaultCode = 'GRbG8abEZ0Q';
-
+    public async enterUserReservationCode(defaultCode = 'GRbG8abEZ0Q') {
         await this.reservationCodeInput.fill(defaultCode);
     }
 

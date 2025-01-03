@@ -32,35 +32,8 @@ export class ReservationPagePO {
             'Sun': 6
         }
 
-        if (day === 'Mon') {
-            await this.page.locator('.fc-row.fc-widget-header').locator('>=data-date').nth(mapDayToNumb[day]);
-            await this.page.locator(`.fc-widget-content [data-test="reservation-entry-1-${hour}"]`).click();
-
-        } if (day === 'Tue') {
-            await this.page.locator('.fc-row.fc-widget-header').locator('>=data-date').nth(mapDayToNumb[day]);
-            await expect(this.page.locator(`.fc-widget-content [data-test="reservation-entry-2-${hour}"]`)).toBeVisible();
-            await this.page.locator(`[data-test="reservation-entry-2-${hour}"]`).click();
-
-        } if (day === 'Wed') {
-            await this.page.locator('.fc-row.fc-widget-header').locator('>=data-date').nth(mapDayToNumb[day]);
-            await this.page.locator(`.fc-widget-content [data-test="reservation-entry-3-${hour}"]`).click();
-
-        } if (day === 'Thu') {
-            await this.page.locator('.fc-row.fc-widget-header').locator('>=data-date').nth(mapDayToNumb[day]);
-            await this.page.locator(`.fc-widget-content [data-test="reservation-entry-4-${hour}"]`).click();
-
-        } if (day === 'Fri') {
-            await this.page.locator('.fc-row.fc-widget-header').locator('>=data-date').nth(mapDayToNumb[day]);
-            await this.page.locator(`.fc-widget-content [data-test="reservation-entry-5-${hour}}`).click();
-
-        } if (day === 'Sat') {
-            await this.page.locator('.fc-row.fc-widget-header').locator('>=data-date').nth(mapDayToNumb[day]);
-            await this.page.locator(`.fc-widget-content [data-test="reservation-entry-6-${hour}"]`).click();
-
-        } if (day === 'Sun') {
-            await this.page.locator('.fc-row.fc-widget-header').locator('>=data-date').nth(mapDayToNumb[day]);
-            await this.page.locator(`.fc-widget-content [data-test="reservation-entry-7-${hour}"]`).click();
-        }
+        await this.page.locator('.fc-row.fc-widget-header').locator('>=data-date').nth(mapDayToNumb[day]);
+        await this.page.locator(`.fc-widget-content [data-test="reservation-entry-${mapDayToNumb[day] +1}-${hour}"]`).click();
     }
 
     public get rehearsalRoomElement() {
@@ -223,20 +196,20 @@ export class ReservationPagePO {
         await this.agreementCheckbox.click();
     }
 
-    public get submitAndOnlinePaymentButton() {
+    public get submitWithOnlinePaymentButton() {
         return this.page.getByTestId('form-submit-online-payment');
     }
 
-    public async submitAndSelectOnlinePayment() {
-        await this.submitAndOnlinePaymentButton.click();
+    public async submitWithOnlinePayment() {
+        await this.submitWithOnlinePaymentButton.click();
     }
 
-    public get submitAndCashPaymentButton() {
+    public get submitWithCashPaymentButton() {
         return this.page.getByTestId('form-submit');
     }
 
-    public async submitAndSelectCashPayment() {
-        await this.submitAndCashPaymentButton.click();
+    public async submitWithCashPayment() {
+        await this.submitWithCashPaymentButton.click();
     }
 
     public get successfulReservationAlert() {
