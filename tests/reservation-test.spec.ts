@@ -51,6 +51,8 @@ test.describe('Cash reservation tests', async () => {
             await pages.reservationPage.expectSelectedTimeToBe(String(generated.startHour), String(reservation.endHour));
         });
 
+        const reservationDate = await pages.reservationPage.startDateInput.getAttribute('value');
+
         await test.step('Select the checkbox and send the form', async () => {
             await pages.reservationPage.selectAgreementCheckbox();
             await pages.reservationPage.submitWithCashPayment();
@@ -60,9 +62,10 @@ test.describe('Cash reservation tests', async () => {
             await pages.bookingConfirmationPage.expectEnteredNumberToBeVisible(generated.phoneNum);
             await pages.bookingConfirmationPage.enterUserReservationCode();
             await pages.bookingConfirmationPage.confirmReservation();
-            // todo - extend the test to validate if reservation appears at the calendar properly
             await expect(pages.reservationPage.successfulReservationAlert).toBeVisible();
             await expect(pages.reservationPage.successfulReservationAlert).toHaveText(successfulMessage);
+            await pages.reservationPage.closeSuccessfulReservationAlert();
+            await pages.reservationPage.expectReservationToBeCreated(reservationDate, String(generated.startHour), reservation.bandName);
         });
     });
 
