@@ -36,6 +36,10 @@ export class ReservationPagePO {
         await this.page.locator(`.fc-widget-content [data-test="reservation-entry-${mapDayToNumb[day] +1}-${hour}"]`).click();
     }
 
+    public get reservationFormElement() {
+        return this.page.locator('.reservation-form-container');
+    }
+
     public get rehearsalRoomElement() {
         return this.page.getByTestId('form-room');
     }
@@ -97,6 +101,10 @@ export class ReservationPagePO {
         await this.bandNameInput.fill(name);
     }
 
+    public async expectBandNameErrorMessageToBe(errorMessage: string) {
+        await expect(this.bandNameInput.locator('~ div').getByText(errorMessage)).toBeVisible();
+    }
+
     public get phoneNumberInput() {
         return this.page.getByTestId('form-phone-number');
     }
@@ -104,6 +112,10 @@ export class ReservationPagePO {
     public async enterPhoneNumber(number: string) {
         // correct phone number starts at: 50, 51, 53, 57, 60, 66, 69, 72, 73, 78, 79, 88
         await this.phoneNumberInput.fill(number);
+    }
+
+    public async expectPhoneNumErrorMessageToBe(errorMessage: string) {
+        await expect(this.phoneNumberInput.locator('~ div').getByText(errorMessage)).toBeVisible();
     }
 
     public async generateRandomPhoneNumber() {
@@ -137,6 +149,10 @@ export class ReservationPagePO {
     public async enterEndDate(day: string) {
         await this.endDateInput.click();
         await this.datePicker.selectDay(day);
+    }
+
+    public async expectEndDateErrorMessageToBe(errorMessage: string) {
+        await expect(this.endDateInput.locator('~ div').getByText(errorMessage)).toBeVisible();
     }
 
     public async enterReservationDate(startDay: string, endDay?: string) {
@@ -238,10 +254,6 @@ export class ReservationPagePO {
 
     public async generateRandomHour() {
         return Math.floor(Math.random() * 22);
-    }
-
-    public async expectEndDateErrorMessageToBe(errorMessage: string) {
-        await expect(this.dateClass.last()).toContainText(errorMessage);
     }
 
     public async expectReservationToBeCreated(date: string, startHour: string, bandName: string) {
