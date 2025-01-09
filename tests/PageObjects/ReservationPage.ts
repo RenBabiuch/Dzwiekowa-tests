@@ -220,6 +220,14 @@ export class ReservationPagePO {
         await this.submitWithOnlinePaymentButton.click();
     }
 
+    public async getOnlineReservationPrice() {
+        // needed to get the text with amount to pay. Without this, the amount info is not returned
+        await this.page.waitForTimeout(200);
+        const reservationPriceText = await this.submitWithOnlinePaymentButton.textContent();
+
+        return reservationPriceText.substring(33, 35);
+    }
+
     public get submitWithCashPaymentButton() {
         return this.page.getByTestId('form-submit');
     }
