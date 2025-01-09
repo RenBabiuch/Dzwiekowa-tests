@@ -1,6 +1,6 @@
 import {expect, Page} from "@playwright/test";
 
-export class BookingConfirmationPagePO {
+export class PhoneConfirmationPagePO {
     constructor(private page: Page) {
     }
 

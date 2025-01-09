@@ -60,9 +60,9 @@ test.describe('Cash reservation tests', async () => {
         });
 
         await test.step('After entering correct reservation code - the reservation should be created properly', async () => {
-            await pages.bookingConfirmationPage.expectEnteredNumberToBeVisible(generated.phoneNum);
-            await pages.bookingConfirmationPage.enterUserReservationCode();
-            await pages.bookingConfirmationPage.confirmReservation();
+            await pages.phoneConfirmationPage.expectEnteredNumberToBeVisible(generated.phoneNum);
+            await pages.phoneConfirmationPage.enterUserReservationCode();
+            await pages.phoneConfirmationPage.confirmReservation();
             await expect(pages.reservationPage.successfulReservationAlert).toBeVisible();
             await expect(pages.reservationPage.successfulReservationAlert).toHaveText(successfulMessage);
             await pages.reservationPage.closeSuccessfulReservationAlert();
