@@ -5,7 +5,7 @@ export class Header {
     }
 
     public get weekDateElement() {
-        return this.page.locator('√.fc-toolbar.fc-header-toolbar');
+        return this.page.locator('.fc-toolbar.fc-header-toolbar');
     }
 
 }

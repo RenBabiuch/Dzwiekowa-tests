@@ -33,7 +33,7 @@ export class ReservationPagePO {
         }
 
         await this.page.locator('.fc-row.fc-widget-header').locator('>=data-date').nth(mapDayToNumb[day]);
-        await this.page.locator(`.fc-widget-content [data-test="reservation-entry-${mapDayToNumb[day] +1}-${hour}"]`).click();
+        await this.page.locator(`.fc-widget-content [data-test="reservation-entry-${mapDayToNumb[day] + 1}-${hour}"]`).click();
     }
 
     public get reservationFormElement() {
@@ -54,7 +54,7 @@ export class ReservationPagePO {
         await this.rehearsalRoomElement.locator('button').click();
         await expect(this.page.getByRole('menu')).toBeVisible();
 
-        if(roomName === 'Wszystkie') {
+        if (roomName === 'Wszystkie') {
             await this.page.getByRole('menuitem', {name: 'Wszystkie'}).click();
         } else {
             await this.page.getByTestId(`form-room-${roomNameToNumberMap[roomName]}`).click();
@@ -80,10 +80,10 @@ export class ReservationPagePO {
         await this.reservationTypeButton.click();
         await expect(this.page.getByRole('menu')).toBeVisible();
 
-        if(typeName === 'Wybierz...') {
+        if (typeName === 'Wybierz...') {
             await this.page.getByRole('menuitem', {name: 'Wybierz...'}).click();
         } else {
-           await this.page.getByTestId(this.reservationTypeIdSelector + `-${typeNameToNumberMap[typeName]}`).click();
+            await this.page.getByTestId(this.reservationTypeIdSelector + `-${typeNameToNumberMap[typeName]}`).click();
         }
     }
 
@@ -191,13 +191,13 @@ export class ReservationPagePO {
 
     public async expectSelectedTimeToBe(startHour: string, endHour: string) {
 
-        if(startHour.length === 1) {
+        if (startHour.length === 1) {
             await expect(this.startTimeInput).toHaveValue(`0${startHour}:00`);
-        }  else {
+        } else {
             await expect(this.startTimeInput).toHaveValue(`${startHour}:00`);
         }
 
-        if(endHour.length === 1) {
+        if (endHour.length === 1) {
             await expect(this.endTimeInput).toHaveValue(`0${endHour}:00`);
         } else {
             await expect(this.endTimeInput).toHaveValue(`${endHour}:00`);
@@ -221,11 +221,18 @@ export class ReservationPagePO {
     }
 
     public async getOnlineReservationPrice() {
-        // needed to get the text with amount to pay. Without this, the amount info is not returned
-        await this.page.waitForTimeout(200);
-        const reservationPriceText = await this.submitWithOnlinePaymentButton.textContent();
 
-        return reservationPriceText.substring(33, 35);
+        const getPrice = async () => {
+            const text = await this.submitWithOnlinePaymentButton.textContent()
+            return text.substring(33, 35);
+        }
+
+        await expect(async () => {
+            const currentPrice = await getPrice();
+            await expect(currentPrice.length).toBeGreaterThan(0);
+        }).toPass();
+
+        return getPrice();
     }
 
     public get submitWithCashPaymentButton() {
@@ -270,7 +277,7 @@ export class ReservationPagePO {
         await expect(dateInRowSelector).toBeVisible();
 
         const dayWeekName = await dateInRowSelector.innerText();
-        const dayWeekNameSubstring = dayWeekName.substring(0,3);
+        const dayWeekNameSubstring = dayWeekName.substring(0, 3);
 
         const polWeekDaysToNumbMap = {
             'pon': '1',
