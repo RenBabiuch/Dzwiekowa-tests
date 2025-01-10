@@ -9,7 +9,7 @@ test.beforeEach(async({page}) => {
 });
 
 
-test('Successful online payment', async({page}) => {
+test('Successful online payment', async() => {
     const reservation = {
         bandName: 'Mars&Stones',
         phone: await pages.reservationPage.generateRandomPhoneNumber(),
@@ -20,28 +20,39 @@ test('Successful online payment', async({page}) => {
     const endHour = reservation.startHour + 2;
     const email = 'songs@karaoke.pl';
 
-    await pages.reservationPage.selectRehearsalRoom('Stary Mlyn');
-    await pages.reservationPage.selectReservationType('Nagrywka');
-    await pages.reservationPage.enterBandName(reservation.bandName);
-    await pages.reservationPage.enterPhoneNumber(reservation.phone);
-    await pages.reservationPage.enterReservationDate(reservation.date);
-    await pages.reservationPage.selectReservationTime(String(reservation.startHour), String(endHour));
-    await pages.reservationPage.selectAgreementCheckbox();
+    await test.step('Fill the reservation form with correct data', async() => {
+        await pages.reservationPage.selectRehearsalRoom('Stary Mlyn');
+        await pages.reservationPage.selectReservationType('Nagrywka');
+        await pages.reservationPage.enterBandName(reservation.bandName);
+        await pages.reservationPage.enterPhoneNumber(reservation.phone);
+        await pages.reservationPage.enterReservationDate(reservation.date);
+        await pages.reservationPage.selectReservationTime(String(reservation.startHour), String(endHour));
+        await pages.reservationPage.selectAgreementCheckbox();
+    });
 
+    const reservationDate = await pages.reservationPage.startDateInput.getAttribute('value');
     const currentReservationPrice = await pages.reservationPage.getOnlineReservationPrice();
 
-    await pages.reservationPage.submitWithOnlinePayment();
-    await pages.phoneConfirmationPage.expectEnteredNumberToBeVisible(reservation.phone);
-    await pages.phoneConfirmationPage.enterUserReservationCode();
-    await pages.phoneConfirmationPage.confirmReservation();
-    await expect(pages.prePaymentPage.emailVerificationContainer).toBeVisible();
-    await pages.prePaymentPage.enterEmailAddress(email);
-    await pages.prePaymentPage.goToPayment();
-    await expect(pages.paymentMethodMenu.paymentContainer).toBeVisible();
-    await pages.paymentMethodMenu.goToTransferPayment();
-    await pages.transferPage.paymentMethodMenu.expectTransactionAmountToBe(currentReservationPrice);
-    await pages.transferPage.selectIngBankTransfer();
-    await pages.bankPage.expectTransactionAmountToBe(currentReservationPrice);
-    await pages.bankPage.goToPay();
+    await test.step('Go to online payment and enter reservation code', async() => {
+        await pages.reservationPage.submitWithOnlinePayment();
+        await pages.phoneConfirmationPage.expectEnteredNumberToBeVisible(reservation.phone);
+        await pages.phoneConfirmationPage.enterUserReservationCode();
+        await pages.phoneConfirmationPage.confirmReservation();
+    });
 
+    await test.step('Enter email address and go to transfer payment - the amount should be the same as at the beginning', async() => {
+        await expect(pages.prePaymentPage.emailVerificationContainer).toBeVisible();
+        await pages.prePaymentPage.enterEmailAddress(email);
+        await pages.prePaymentPage.goToPayment();
+        await expect(pages.paymentMethodMenu.paymentContainer).toBeVisible();
+        await pages.paymentMethodMenu.goToTransferPayment();
+        await pages.transferPage.paymentMethodMenu.expectTransactionAmountToBe(currentReservationPrice);
+    });
+
+    await test.step('Select transfer method - after paying, the reservation should be created properly at calendar', async() => {
+        await pages.transferPage.selectIngBankTransfer();
+        await pages.bankPage.expectTransactionAmountToBe(currentReservationPrice);
+        await pages.bankPage.goToPay();
+        await pages.reservationPage.expectReservationToBeCreated(reservationDate, String(reservation.startHour), reservation.bandName);
+    });
 });
