@@ -31,7 +31,7 @@ const reservationType = {
 const successfulMessage = 'Rezerwacja zapisana pomyślnie. Na podany numer telefonu otrzymasz potwierdzenie, a zaraz przed próbą wyślemy kod do drzwi.';
 const emptyFieldErrorMessage = 'Pole jest wymagane';
 
-test.describe('Cash reservation tests', async () => {
+test.describe('Reservation tests', async () => {
 
     test('Successful reservation with correct data', async () => {
 
@@ -65,7 +65,6 @@ test.describe('Cash reservation tests', async () => {
             await pages.phoneConfirmationPage.confirmReservation();
             await expect(pages.reservationPage.successfulReservationAlert).toBeVisible();
             await expect(pages.reservationPage.successfulReservationAlert).toHaveText(successfulMessage);
-            await pages.reservationPage.closeSuccessfulReservationAlert();
             await pages.reservationPage.expectReservationToBeCreated(reservationDate, String(generated.startHour), reservation.bandName);
         });
     });
@@ -145,6 +144,37 @@ test.describe('Cash reservation tests', async () => {
             await pages.reservationPage.selectAgreementCheckbox();
             await pages.reservationPage.submitWithCashPayment();
             await pages.reservationPage.expectEndDateErrorMessageToBe(hourErrorMessage);
+        });
+    });
+
+    test('Unsuccessful creating a reservation for an already booked date', async() => {
+
+        const reservation = {
+            bandName1: 'Band Uno',
+            bandName2: 'Band Los_Dos',
+            date: await pages.reservationPage.getSpecificDate('tomorrow'),
+            endHour: generated.startHour + 2,
+        } as const;
+
+        let reservationDate = '';
+        const roomOccupancyErrorMessage = 'Czas rezerwacji pokrywa się z innymi wpisami.';
+
+        await test.step('Book a rehear-room for the first band', async() => {
+            await pages.reservationPage.fillTheReservationForm(roomsName.num2, reservationType.band, reservation.bandName1, generated.phoneNum, String(generated.startHour), String(reservation.endHour), reservation.date);
+            await pages.reservationPage.submitWithCashPayment();
+
+            reservationDate = await pages.reservationPage.startDateInput.getAttribute('value');
+
+            await pages.phoneConfirmationPage.enterUserReservationCode();
+            await pages.phoneConfirmationPage.confirmReservation();
+            await expect(pages.reservationPage.successfulReservationAlert).toBeVisible();
+            await pages.reservationPage.expectReservationToBeCreated(reservationDate, String(generated.startHour), reservation.bandName1);
+        });
+
+        await test.step('After creating a reservation for the same - already booked - date, an error message should appear', async() => {
+            await pages.reservationPage.fillTheReservationForm(roomsName.num2, reservationType.band, reservation.bandName2, generated.phoneNum, String(generated.startHour), String(reservation.endHour), reservation.date);
+            await pages.reservationPage.submitWithCashPayment();
+            await pages.reservationPage.expectEndDateErrorMessageToBe(roomOccupancyErrorMessage)
         });
     });
 
