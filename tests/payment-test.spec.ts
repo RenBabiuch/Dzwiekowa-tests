@@ -53,6 +53,6 @@ test('Successful online payment', async() => {
         await pages.transferPage.selectIngBankTransfer();
         await pages.bankPage.expectTransactionAmountToBe(currentReservationPrice);
         await pages.bankPage.goToPay();
-        await pages.reservationPage.expectReservationToBeCreated(reservationDate, String(reservation.startHour), reservation.bandName);
+        await pages.reservationPage.expectReservationToBeCreated(reservationDate, String(reservation.startHour), reservation.bandName, false);
     });
 });
