@@ -3,7 +3,12 @@ import {Header} from "../components/header";
 import {DatePicker} from "../components/date-picker";
 import {TimePicker} from "../components/time-picker";
 
-export class ReservationPagePO {
+    type weekDayType = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun';
+    type roomNameType = 'Wszystkie' | 'Browar Miesczanski' | 'Stary Mlyn';
+    type reservationTypeNameType = 'Wybierz...' | 'Zespol' | 'Solo' | 'Nagrywka';
+    type dayNameType = 'yesterday' | 'today' | 'tomorrow' | 'day after tomorrow';
+
+    export class ReservationPagePO {
     constructor(private page: Page) {
     }
 
@@ -21,7 +26,7 @@ export class ReservationPagePO {
     }
 
     // WIP
-    public async selectDate(day: 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun', hour: string) {
+    public async selectDate(weekDay: weekDayType, hour: string) {
         const mapDayToNumb = {
             'Mon': 0,
             'Tue': 1,
@@ -32,8 +37,8 @@ export class ReservationPagePO {
             'Sun': 6
         }
 
-        await this.page.locator('.fc-row.fc-widget-header').locator('>=data-date').nth(mapDayToNumb[day]);
-        await this.page.locator(`.fc-widget-content [data-test="reservation-entry-${mapDayToNumb[day] + 1}-${hour}"]`).click();
+        await this.page.locator('.fc-row.fc-widget-header').locator('>=data-date').nth(mapDayToNumb[weekDay]);
+        await this.page.locator(`.fc-widget-content [data-test="reservation-entry-${mapDayToNumb[weekDay] + 1}-${hour}"]`).click();
     }
 
     public get reservationFormElement() {
@@ -44,7 +49,7 @@ export class ReservationPagePO {
         return this.page.getByTestId('form-room');
     }
 
-    public async selectRehearsalRoom(roomName: 'Wszystkie' | 'Browar Miesczanski' | 'Stary Mlyn') {
+    public async selectRehearsalRoom(roomName: roomNameType) {
 
         const roomNameToNumberMap = {
             'Browar Miesczanski': '1',
@@ -69,7 +74,7 @@ export class ReservationPagePO {
         return this.page.locator('[id^="undefined-undefined-Typrezerwacji-"] button');
     }
 
-    public async selectReservationType(typeName: 'Wybierz...' | 'Zespol' | 'Solo' | 'Nagrywka') {
+    public async selectReservationType(typeName: reservationTypeNameType) {
 
         const typeNameToNumberMap = {
             'Zespol': '0',
@@ -243,6 +248,16 @@ export class ReservationPagePO {
         await this.submitWithCashPaymentButton.click();
     }
 
+    public async fillTheReservationForm(room: roomNameType, type: reservationTypeNameType, bandName: string, phoneNum: string, startHour: string, endHour: string, startDay: string, endDay?: string ) {
+        await this.selectRehearsalRoom(room);
+        await this.selectReservationType(type);
+        await this.enterBandName(bandName);
+        await this.enterPhoneNumber(phoneNum);
+        await this.enterReservationDate(startDay, endDay);
+        await this.selectReservationTime(startHour, endHour);
+        await this.selectAgreementCheckbox();
+    }
+
     public get successfulReservationAlert() {
         return this.page.getByTestId('successful-reservation');
     }
@@ -251,7 +266,7 @@ export class ReservationPagePO {
         await this.successfulReservationAlert.getByTestId('accept').click();
     }
 
-    public async getSpecificDate(dayName: "yesterday" | "today" | "tomorrow" | "day after tomorrow") {
+    public async getSpecificDate(dayName: dayNameType) {
 
         const dayNameToNumberMap = {
             "yesterday": -1,
@@ -273,6 +288,7 @@ export class ReservationPagePO {
 
     public async expectReservationToBeCreated(date: string, startHour: string, bandName: string) {
 
+        await this.closeSuccessfulReservationAlert();
         const dateInRowSelector = this.page.locator(`.fc-row.fc-widget-header [data-date="${date}"]`);
         await expect(dateInRowSelector).toBeVisible();
 
