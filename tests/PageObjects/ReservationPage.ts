@@ -1,9 +1,8 @@
 import {expect, Page} from "@playwright/test";
-import {Header} from "../components/header";
+import {Calendar} from "../components/calendar";
 import {DatePicker} from "../components/date-picker";
 import {TimePicker} from "../components/time-picker";
 
-    type weekDayType = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun';
     type roomNameType = 'Wszystkie' | 'Browar Miesczanski' | 'Stary Mlyn';
     type reservationTypeNameType = 'Wybierz...' | 'Zespol' | 'Solo' | 'Nagrywka';
     type dayNameType = 'yesterday' | 'today' | 'tomorrow' | 'day after tomorrow';
@@ -12,34 +11,9 @@ import {TimePicker} from "../components/time-picker";
     constructor(private page: Page) {
     }
 
-    header = new Header(this.page);
+    calendar = new Calendar(this.page);
     datePicker = new DatePicker(this.page);
     timePicker = new TimePicker(this.page);
-
-    public async expectDateAndHourToBeVisibleOnCalendarElement(year: string, month: string, day: string, hour: string) {
-        await expect(this.page.locator(`.fc-widget-content [data-date="${year}-${month}-${day}"]`)).toBeVisible();
-        await expect(this.page.locator(`[data-time="${hour}:00:00"]`)).toBeVisible();
-    }
-
-    public get currentDayElement() {
-        return this.page.locator('.fc-today');
-    }
-
-    // WIP
-    public async selectDate(weekDay: weekDayType, hour: string) {
-        const mapDayToNumb = {
-            'Mon': 0,
-            'Tue': 1,
-            'Wed': 2,
-            'Thu': 3,
-            'Fri': 4,
-            'Sat': 5,
-            'Sun': 6
-        }
-
-        await this.page.locator('.fc-row.fc-widget-header').locator('>=data-date').nth(mapDayToNumb[weekDay]);
-        await this.page.locator(`.fc-widget-content [data-test="reservation-entry-${mapDayToNumb[weekDay] + 1}-${hour}"]`).click();
-    }
 
     public get reservationFormElement() {
         return this.page.locator('.reservation-form-container');
@@ -125,11 +99,15 @@ import {TimePicker} from "../components/time-picker";
 
     public async generateRandomPhoneNumber() {
 
+        const numberBeginningTab = [50, 51, 53, 57, 60, 66, 69, 72, 73, 78, 79, 88];
+        const randomIndex = Math.floor(Math.random() * numberBeginningTab.length);
+        const randomBeginningValue = numberBeginningTab[randomIndex];
+
         const min = 1000000;
         const max = 9999999;
 
         const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
-        return '50' + String(randomNum);
+        return randomBeginningValue + String(randomNum);
     }
 
     dateClass = this.page.locator('.form__input-date');
@@ -286,9 +264,12 @@ import {TimePicker} from "../components/time-picker";
         return Math.floor(Math.random() * 22);
     }
 
-    public async expectReservationToBeCreated(date: string, startHour: string, bandName: string) {
+    public async expectReservationToBeCreated(date: string, startHour: string, bandName: string, successfulAlert = true) {
 
-        await this.closeSuccessfulReservationAlert();
+        if(successfulAlert) {
+         await this.closeSuccessfulReservationAlert();
+        }
+
         const dateInRowSelector = this.page.locator(`.fc-row.fc-widget-header [data-date="${date}"]`);
         await expect(dateInRowSelector).toBeVisible();
 
