@@ -1,12 +1,11 @@
 import {Page} from "@playwright/test";
+import {AdminHeader} from "../components/admin-header";
 
-export class AdminManagePanelPagePO {
+export class AdminReservationPagePO {
     constructor(private page: Page) {
     }
 
-    public get manageAdminPanelInfo() {
-        return this.page.getByText('Jesteś w Panelu Zarządzania', {exact: true});
-    }
+    adminHeader = new AdminHeader(this.page);
 
     public get calendarElement() {
         return this.page.locator('.reservation__calendar');
