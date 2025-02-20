@@ -4,15 +4,31 @@ import initialise from "./PageObjects/initialise";
 let pages: ReturnType<typeof initialise>;
 test.beforeEach(async({page}) => {
    pages = initialise(page);
+
+   await page.goto('/#admin');
 });
 
-test('Admin log in to the platform works', async({page}) => {
+test('Successful log in with correct data', async() => {
+   const password = '12345';
+
+   await test.step('After logging in, admin panel with correct data should appear', async() => {
+      await pages.adminLoginPage.loginTheUser(password);
+      await expect(pages.adminReservationPage.adminHeader.loggedToAdminPanelInfo).toBeVisible();
+      await expect(pages.adminReservationPage.calendarElement).toBeVisible();
+      await pages.adminReservationPage.adminHeader.goToManageRooms();
+      await expect(pages.adminManageRoomsPage.getRoomContainer('Browar Miesczanski')).toBeVisible();
+      await expect(pages.adminManageRoomsPage.getRoomContainer('Stary Młyn')).toBeVisible();
+   });
+});
+
+test('Unsuccessful log in with incorrect data ', async() => {
    const password = '123admin';
 
-   await test.step('After log in, admin manage panel with calendar should be visible', async() => {
-      await page.goto('/#admin');
+   await test.step('After logging in, admin panel without any data should appear', async() => {
       await pages.adminLoginPage.loginTheUser(password);
-      await expect(pages.adminManagePanelPage.manageAdminPanelInfo).toBeVisible();
-      await expect(pages.adminManagePanelPage.calendarElement).toBeVisible();
+      await expect(pages.adminReservationPage.adminHeader.loggedToAdminPanelInfo).toBeVisible();
+      await pages.adminReservationPage.adminHeader.goToManageRooms();
+      await expect(pages.adminManageRoomsPage.getRoomContainer('Browar Miesczanski')).not.toBeVisible();
+      await expect(pages.adminManageRoomsPage.getRoomContainer('Stary Młyn')).not.toBeVisible();
    });
 });
