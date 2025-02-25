@@ -99,9 +99,9 @@ import {TimePicker} from "../components/time-picker";
 
     public async generateRandomPhoneNumber() {
 
-        const numberBeginningTab = [50, 51, 53, 57, 60, 66, 69, 72, 73, 78, 79, 88];
-        const randomIndex = Math.floor(Math.random() * numberBeginningTab.length);
-        const randomBeginningValue = numberBeginningTab[randomIndex];
+        const validPhoneNumberPrefixes = [50, 51, 53, 57, 60, 66, 69, 72, 73, 78, 79, 88];
+        const randomIndex = Math.floor(Math.random() * validPhoneNumberPrefixes.length);
+        const randomBeginningValue = validPhoneNumberPrefixes[randomIndex];
 
         const min = 1000000;
         const max = 9999999;
@@ -269,27 +269,6 @@ import {TimePicker} from "../components/time-picker";
         if(successfulAlert) {
          await this.closeSuccessfulReservationAlert();
         }
-
-        const dateInRowSelector = this.page.locator(`.fc-row.fc-widget-header [data-date="${date}"]`);
-        await expect(dateInRowSelector).toBeVisible();
-
-        const dayWeekName = await dateInRowSelector.innerText();
-        const dayWeekNameSubstring = dayWeekName.substring(0, 3);
-
-        const polWeekDaysToNumbMap = {
-            'pon': '1',
-            'wt ': '2',
-            'śr ': '3',
-            'czw': '4',
-            'pt ': '5',
-            'sob': '6',
-            'ndz': '7'
-        }
-
-        const specificCalendarReservationElem = this.page.getByTestId(`reservation-entry-${polWeekDaysToNumbMap[dayWeekNameSubstring]}-${startHour}`);
-        const previewOfCalendarReservation = specificCalendarReservationElem.getByText(bandName);
-
-        await expect(previewOfCalendarReservation).not.toBeVisible();
-        await expect(specificCalendarReservationElem).toBeVisible();
+        await this.calendar.expectReservationToBeVisible(date, startHour, bandName);
     }
 }
