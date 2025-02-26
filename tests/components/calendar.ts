@@ -1,0 +1,120 @@
+import {expect, Page} from "@playwright/test";
+
+type weekDayType = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun';
+
+const mapWeekDayToNumb = {
+    'Mon': 0,
+    'Tue': 1,
+    'Wed': 2,
+    'Thu': 3,
+    'Fri': 4,
+    'Sat': 5,
+    'Sun': 6
+} as const;
+
+export class Calendar {
+    constructor(private page: Page) {
+    }
+
+    public get weekDateRangeElement() {
+        return this.page.locator('.fc-toolbar.fc-header-toolbar');
+    }
+
+    // WIP
+    public async selectDate(weekDay: weekDayType, hour: string) {
+
+        await this.page.locator('.fc-row.fc-widget-header').locator('>=data-date').nth(mapWeekDayToNumb[weekDay]);
+        await this.page.locator(`.fc-widget-content [data-test="reservation-entry-${mapWeekDayToNumb[weekDay] + 1}-${hour}"]`).click();
+    }
+
+    public get generateTodayDate() {
+        const today = new Date();
+        return today.toISOString().substring(0, 10);
+    }
+
+    public getDayElement(date?: string) {
+        if(date) {
+            return this.page.locator(`.fc-day.fc-widget-content[data-date="${date}"]`);
+        } else {
+            return this.page.locator('.fc-day.fc-widget-content[data-date]');
+        }
+    }
+
+    public async expectToShowCorrectDateIndicatedAsToday() {
+        const todayCalendarDate = await this.page.locator('.fc-today').last().getAttribute('data-date');
+        expect(todayCalendarDate).toEqual(this.generateTodayDate);
+    }
+
+    public async showCurrentWeek() {
+        await this.page.getByRole('button', {name: "Dziś"}).click();
+    }
+
+    public async goToNextWeek() {
+        await this.page.getByLabel('next').click();
+    }
+
+    public async goToPreviousWeek() {
+        await this.page.getByLabel('prev').click();
+    }
+
+    public async expectDateToBeVisibleInWeekDateRange(date: string) {
+
+        const formatted = {
+            day: date.substring(8,10),
+            month: date.substring(5,7),
+            year: date.substring(0,4),
+        } as const;
+
+        const numToMonthNamesMap = {
+            '01': 'sty',
+            '02': 'lut',
+            '03': 'mar',
+            '04': 'kwi',
+            '05': 'maj',
+            '06': 'cze',
+            '07': 'lip',
+            '08': 'sie',
+            '09': 'wrz',
+            '10': 'paź',
+            '11': 'lis',
+            '12': 'gru',
+        } as const;
+
+        const monthName = numToMonthNamesMap[formatted.month];
+
+        await expect(this.weekDateRangeElement).toContainText(formatted.day);
+        await expect(this.weekDateRangeElement).toContainText(monthName);
+        await expect(this.weekDateRangeElement).toContainText(formatted.year);
+
+        await expect(this.getDayElement(date)).toBeVisible();
+    }
+
+    public async getDateByWeekDay(weekDay: weekDayType) {
+        return this.getDayElement().nth(mapWeekDayToNumb[weekDay]).getAttribute('data-date');
+    }
+
+    public async expectReservationToBeVisible(date: string, startHour: string, bandName: string) {
+
+        const dateInRowSelector = this.page.locator(`.fc-row.fc-widget-header [data-date="${date}"]`);
+        await expect(dateInRowSelector).toBeVisible();
+
+        const dayWeekName = await dateInRowSelector.innerText();
+        const dayWeekNameSubstring = dayWeekName.substring(0, 3);
+
+        const polWeekDaysToNumbMap = {
+            'pon': '1',
+            'wt ': '2',
+            'śr ': '3',
+            'czw': '4',
+            'pt ': '5',
+            'sob': '6',
+            'ndz': '7'
+        }
+
+        const specificCalendarReservationElem = this.page.getByTestId(`reservation-entry-${polWeekDaysToNumbMap[dayWeekNameSubstring]}-${startHour}`);
+        const previewOfCalendarReservation = specificCalendarReservationElem.getByText(bandName);
+
+        await expect(previewOfCalendarReservation).not.toBeVisible();
+        await expect(specificCalendarReservationElem).toBeVisible();
+    }
+}
