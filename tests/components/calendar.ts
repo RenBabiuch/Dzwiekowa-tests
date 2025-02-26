@@ -2,6 +2,16 @@ import {expect, Page} from "@playwright/test";
 
 type weekDayType = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun';
 
+const mapWeekDayToNumb = {
+    'Mon': 0,
+    'Tue': 1,
+    'Wed': 2,
+    'Thu': 3,
+    'Fri': 4,
+    'Sat': 5,
+    'Sun': 6
+} as const;
+
 export class Calendar {
     constructor(private page: Page) {
     }
@@ -10,25 +20,11 @@ export class Calendar {
         return this.page.locator('.fc-toolbar.fc-header-toolbar');
     }
 
-    public async expectDateAndHourToBeVisibleOnCalendarElement(year: string, month: string, day: string, hour: string) {
-        await expect(this.page.locator(`.fc-widget-content [data-date="${year}-${month}-${day}"]`)).toBeVisible();
-        await expect(this.page.locator(`[data-time="${hour}:00:00"]`)).toBeVisible();
-    }
-
     // WIP
     public async selectDate(weekDay: weekDayType, hour: string) {
-        const mapDayToNumb = {
-            'Mon': 0,
-            'Tue': 1,
-            'Wed': 2,
-            'Thu': 3,
-            'Fri': 4,
-            'Sat': 5,
-            'Sun': 6
-        }
 
-        await this.page.locator('.fc-row.fc-widget-header').locator('>=data-date').nth(mapDayToNumb[weekDay]);
-        await this.page.locator(`.fc-widget-content [data-test="reservation-entry-${mapDayToNumb[weekDay] + 1}-${hour}"]`).click();
+        await this.page.locator('.fc-row.fc-widget-header').locator('>=data-date').nth(mapWeekDayToNumb[weekDay]);
+        await this.page.locator(`.fc-widget-content [data-test="reservation-entry-${mapWeekDayToNumb[weekDay] + 1}-${hour}"]`).click();
     }
 
     public get generateTodayDate() {
@@ -36,24 +32,28 @@ export class Calendar {
         return today.toISOString().substring(0, 10);
     }
 
-    public getCalendarDayElement(date: string) {
-        return this.page.locator(`.fc-day.fc-widget-content[data-date="${date}"]`);
+    public getDayElement(date?: string) {
+        if(date) {
+            return this.page.locator(`.fc-day.fc-widget-content[data-date="${date}"]`);
+        } else {
+            return this.page.locator('.fc-day.fc-widget-content[data-date]');
+        }
     }
 
-    public async expectCalendarToShowCorrectDateIndicatedAsToday() {
+    public async expectToShowCorrectDateIndicatedAsToday() {
         const todayCalendarDate = await this.page.locator('.fc-today').last().getAttribute('data-date');
         expect(todayCalendarDate).toEqual(this.generateTodayDate);
     }
 
-    public async showCurrentWeekOnCalendar() {
+    public async showCurrentWeek() {
         await this.page.getByRole('button', {name: "Dziś"}).click();
     }
 
-    public async goToNextWeekOnCalendar() {
+    public async goToNextWeek() {
         await this.page.getByLabel('next').click();
     }
 
-    public async goToPreviousWeekOnCalendar() {
+    public async goToPreviousWeek() {
         await this.page.getByLabel('prev').click();
     }
 
@@ -85,20 +85,36 @@ export class Calendar {
         await expect(this.weekDateRangeElement).toContainText(formatted.day);
         await expect(this.weekDateRangeElement).toContainText(monthName);
         await expect(this.weekDateRangeElement).toContainText(formatted.year);
+
+        await expect(this.getDayElement(date)).toBeVisible();
     }
 
     public async getDateByWeekDay(weekDay: weekDayType) {
+        return this.getDayElement().nth(mapWeekDayToNumb[weekDay]).getAttribute('data-date');
+    }
 
-        const mapWeekDayToNumb = {
-            'Mon': 0,
-            'Tue': 1,
-            'Wed': 2,
-            'Thu': 3,
-            'Fri': 4,
-            'Sat': 5,
-            'Sun': 6
+    public async expectReservationToBeVisible(date: string, startHour: string, bandName: string) {
+
+        const dateInRowSelector = this.page.locator(`.fc-row.fc-widget-header [data-date="${date}"]`);
+        await expect(dateInRowSelector).toBeVisible();
+
+        const dayWeekName = await dateInRowSelector.innerText();
+        const dayWeekNameSubstring = dayWeekName.substring(0, 3);
+
+        const polWeekDaysToNumbMap = {
+            'pon': '1',
+            'wt ': '2',
+            'śr ': '3',
+            'czw': '4',
+            'pt ': '5',
+            'sob': '6',
+            'ndz': '7'
         }
 
-        return this.page.locator('.fc-day.fc-widget-content[data-date]').nth(mapWeekDayToNumb[weekDay]).getAttribute('data-date');
+        const specificCalendarReservationElem = this.page.getByTestId(`reservation-entry-${polWeekDaysToNumbMap[dayWeekNameSubstring]}-${startHour}`);
+        const previewOfCalendarReservation = specificCalendarReservationElem.getByText(bandName);
+
+        await expect(previewOfCalendarReservation).not.toBeVisible();
+        await expect(specificCalendarReservationElem).toBeVisible();
     }
 }
