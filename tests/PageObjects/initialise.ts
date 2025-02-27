@@ -8,6 +8,7 @@ import {PaymentMethodMenu} from "../components/payment-method-menu";
 import {AdminLoginPagePO} from "./Admin-LoginPage";
 import {AdminReservationPagePO} from "./Admin-ReservationPage";
 import {AdminManageRoomsPagePO} from "./Admin-ManageRoomsPage";
+import {AdminReservationDetailsPagePO} from "./Admin-ReservationDetailsPage";
 
 export default function initialise(page: Page) {
     return{
@@ -19,6 +20,7 @@ export default function initialise(page: Page) {
         bankPage: new BankPagePO(page),
         adminLoginPage: new AdminLoginPagePO(page),
         adminReservationPage: new AdminReservationPagePO(page),
-        adminManageRoomsPage: new AdminManageRoomsPagePO(page)
+        adminManageRoomsPage: new AdminManageRoomsPagePO(page),
+        adminReservationDetailsPage: new AdminReservationDetailsPagePO(page)
     }
 }

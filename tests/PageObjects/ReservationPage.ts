@@ -116,6 +116,10 @@ import {TimePicker} from "../components/time-picker";
         return this.page.getByTestId('form-start-date');
     }
 
+    public get startDateInputValue() {
+        return this.startDateInput.getAttribute('value');
+    }
+
     public async enterStartDate(day: string) {
         await this.startDateInput.click();
         await this.datePicker.selectDay(day);
@@ -206,11 +210,26 @@ import {TimePicker} from "../components/time-picker";
     public async getOnlineReservationPrice() {
 
         const getPrice = async () => {
-            const text = await this.submitWithOnlinePaymentButton.textContent()
+            const text = await this.submitWithOnlinePaymentButton.textContent();
             return text.substring(33, 35);
         }
 
         await expect(async () => {
+            const currentPrice = await getPrice();
+            await expect(currentPrice.length).toBeGreaterThan(0);
+        }).toPass();
+
+        return getPrice();
+    }
+
+    public async getCashReservationPrice() {
+
+        const getPrice = async() => {
+          const text = await this.submitWithCashPaymentButton.textContent();
+          return text.substring(38, 40);
+        };
+
+        await expect(async() => {
             const currentPrice = await getPrice();
             await expect(currentPrice.length).toBeGreaterThan(0);
         }).toPass();
@@ -264,11 +283,11 @@ import {TimePicker} from "../components/time-picker";
         return Math.floor(Math.random() * 22);
     }
 
-    public async expectReservationToBeCreated(date: string, startHour: string, bandName: string, successfulAlert = true) {
+    public async expectReservationToBeCreated(date: string, startHour: string, bandName: string, successfulAlert = true, adminPanel = false) {
 
         if(successfulAlert) {
          await this.closeSuccessfulReservationAlert();
         }
-        await this.calendar.expectReservationToBeVisible(date, startHour, bandName);
+        await this.calendar.expectReservationToBeVisible(date, startHour, bandName, adminPanel);
     }
 }
