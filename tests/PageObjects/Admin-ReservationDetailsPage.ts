@@ -24,11 +24,23 @@ export class AdminReservationDetailsPagePO {
         await expect(this.page.getByText('Typ płatności: ')).toContainText(paymentMethod);
     }
 
-    public get cancelWindowButton() {
+    public get closeWindowButton() {
         return this.page.getByText('Zamknij okno');
     }
 
-    public async cancelReservationDetails() {
-        await this.cancelWindowButton.click();
+    public async closeReservationDetails() {
+        await this.closeWindowButton.click();
+    }
+
+    public get cancelReservationButton() {
+        return this.page.getByText('Anuluj rezerwację');
+    }
+
+    public async cancelReservation() {
+        this.page.once('dialog', dialog => {
+            console.log(`Dialog message: ${dialog.message()}`);
+            dialog.accept().catch(() => {});
+        });
+        await this.cancelReservationButton.click();
     }
 }
