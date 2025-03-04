@@ -8,7 +8,7 @@ test.beforeEach(async ({page}) => {
     await page.goto('/');
 });
 
-test('Reservation with correct data is visible in the admin panel', async ({page}) => {
+test('Reservation with correct data is visible in the admin panel and can be canceled', async ({page}) => {
     const reservation = {
         bandName: 'New area band',
         phone: await pages.reservationPage.generateRandomPhoneNumber(),
@@ -50,6 +50,13 @@ test('Reservation with correct data is visible in the admin panel', async ({page
         await pages.adminReservationDetailsPage.expectPhoneNumToBe(reservation.phone);
         await pages.adminReservationDetailsPage.expectReservationPriceToBe(currentPrice);
         await pages.adminReservationDetailsPage.expectPaymentMethodToBe(reservation.paymentMethod);
-        await pages.adminReservationDetailsPage.cancelReservationDetails();
+        await pages.adminReservationDetailsPage.closeReservationDetails();
+    });
+
+    await test.step('When reservation is canceled, its preview should disappear', async() => {
+        await pages.adminReservationPage.calendar.clickToSeeReservationDetails(reservationDate, String(reservation.startHour), reservation.bandName);
+        await pages.adminReservationDetailsPage.cancelReservation();
+        await expect(await pages.adminReservationPage.calendar.getPreviewOfReservationElement(reservationDate, String(reservation.startHour), reservation.bandName)).not.toBeVisible();
+        await expect(await pages.reservationPage.calendar.getReservationElement(reservationDate, String(reservation.startHour))).not.toBeVisible();
     });
 });
