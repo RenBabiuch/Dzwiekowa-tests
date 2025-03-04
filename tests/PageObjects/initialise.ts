@@ -5,6 +5,9 @@ import {PrePaymentPagePO} from "./PrePaymentPage";
 import {TransferPagePO} from "./TransferPage";
 import {BankPagePO} from "./BankPage";
 import {PaymentMethodMenu} from "../components/payment-method-menu";
+import {AdminLoginPagePO} from "./Admin-LoginPage";
+import {AdminReservationPagePO} from "./Admin-ReservationPage";
+import {AdminManageRoomsPagePO} from "./Admin-ManageRoomsPage";
 
 export default function initialise(page: Page) {
     return{
@@ -14,5 +17,8 @@ export default function initialise(page: Page) {
         transferPage: new TransferPagePO(page),
         paymentMethodMenu: new PaymentMethodMenu(page),
         bankPage: new BankPagePO(page),
+        adminLoginPage: new AdminLoginPagePO(page),
+        adminReservationPage: new AdminReservationPagePO(page),
+        adminManageRoomsPage: new AdminManageRoomsPagePO(page)
     }
 }
