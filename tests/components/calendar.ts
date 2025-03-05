@@ -33,7 +33,7 @@ export class Calendar {
     }
 
     public getDayElement(date?: string) {
-        if(date) {
+        if (date) {
             return this.page.locator(`.fc-day.fc-widget-content[data-date="${date}"]`);
         } else {
             return this.page.locator('.fc-day.fc-widget-content[data-date]');
@@ -60,9 +60,9 @@ export class Calendar {
     public async expectDateToBeVisibleInWeekDateRange(date: string) {
 
         const formatted = {
-            day: date.substring(8,10),
-            month: date.substring(5,7),
-            year: date.substring(0,4),
+            day: date.substring(8, 10),
+            month: date.substring(5, 7),
+            year: date.substring(0, 4),
         } as const;
 
         const numToMonthNamesMap = {
@@ -85,7 +85,6 @@ export class Calendar {
         await expect(this.weekDateRangeElement).toContainText(formatted.day);
         await expect(this.weekDateRangeElement).toContainText(monthName);
         await expect(this.weekDateRangeElement).toContainText(formatted.year);
-
         await expect(this.getDayElement(date)).toBeVisible();
     }
 
@@ -93,8 +92,7 @@ export class Calendar {
         return this.getDayElement().nth(mapWeekDayToNumb[weekDay]).getAttribute('data-date');
     }
 
-    public async expectReservationToBeVisible(date: string, startHour: string, bandName: string) {
-
+    public async getReservationElement(date: string, startHour: string) {
         const dateInRowSelector = this.page.locator(`.fc-row.fc-widget-header [data-date="${date}"]`);
         await expect(dateInRowSelector).toBeVisible();
 
@@ -111,10 +109,29 @@ export class Calendar {
             'ndz': '7'
         }
 
-        const specificCalendarReservationElem = this.page.getByTestId(`reservation-entry-${polWeekDaysToNumbMap[dayWeekNameSubstring]}-${startHour}`);
-        const previewOfCalendarReservation = specificCalendarReservationElem.getByText(bandName);
+        return this.page.getByTestId(`reservation-entry-${polWeekDaysToNumbMap[dayWeekNameSubstring]}-${startHour}`);
+    }
 
-        await expect(previewOfCalendarReservation).not.toBeVisible();
-        await expect(specificCalendarReservationElem).toBeVisible();
+    public async getPreviewOfReservationElement(date: string, startHour: string, bandName: string) {
+        const reservationElem = await this.getReservationElement(date, startHour);
+        return reservationElem.getByText(bandName);
+    }
+
+    public async expectReservationToBeVisible(date: string, startHour: string, bandName: string, adminPanel = false) {
+        const previewOfReservationElem = await this.getPreviewOfReservationElement(date, startHour, bandName);
+        const reservationElem = await this.getReservationElement(date, startHour);
+
+        if (adminPanel) {
+            await expect(previewOfReservationElem).toBeVisible();
+            await expect(reservationElem).toBeVisible();
+        } else {
+            await expect(previewOfReservationElem).not.toBeVisible();
+            await expect(reservationElem).toBeVisible();
+        }
+    }
+
+    public async clickToSeeReservationDetails(date: string, startHour: string, bandName: string) {
+        const previewOfReservationElem = await this.getPreviewOfReservationElement(date, startHour, bandName);
+        await previewOfReservationElem.click();
     }
 }
