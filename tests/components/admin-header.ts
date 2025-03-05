@@ -15,4 +15,12 @@ export class AdminHeader {
     public async goToManageRooms() {
         await this.manageRoomButton.click();
     }
+
+    public get logoutButton() {
+        return this.page.getByTestId('logout');
+    }
+
+    public async logoutTheUser() {
+        await this.logoutButton.click();
+    }
 }
