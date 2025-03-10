@@ -2,6 +2,8 @@ import {Page} from "@playwright/test";
 import {AdminHeader} from "../components/admin-header";
 import {Calendar} from "../components/calendar";
 
+    type reservationScopeType = 'Aktywne' | 'Oczekujące potwierdzenia' | 'Wygasłe' | 'Anulowane';
+
 export class AdminReservationPagePO {
     constructor(private page: Page) {
     }
@@ -11,5 +13,13 @@ export class AdminReservationPagePO {
 
     public get calendarElement() {
         return this.page.locator('.reservation__calendar');
+    }
+
+    public getReservationScopeElement(scopeName: reservationScopeType) {
+        return this.page.getByLabel(scopeName);
+    }
+
+    public async selectReservationScope(scopeName: reservationScopeType) {
+        await this.getReservationScopeElement(scopeName).click();
     }
 }
