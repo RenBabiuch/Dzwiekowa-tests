@@ -53,10 +53,14 @@ test('Reservation with correct data is visible in the admin panel and can be can
         await pages.adminReservationDetailsPage.closeReservationDetails();
     });
 
-    await test.step('When reservation is canceled, its preview should disappear', async() => {
+    await test.step('When reservation is canceled, its preview should disappear - except canceled reservations view', async() => {
         await pages.adminReservationPage.calendar.clickToSeeReservationDetails(reservationDate, String(reservation.startHour), reservation.bandName);
         await pages.adminReservationDetailsPage.cancelReservation();
         await expect(await pages.adminReservationPage.calendar.getPreviewOfReservationElement(reservationDate, String(reservation.startHour), reservation.bandName)).not.toBeVisible();
         await expect(await pages.reservationPage.calendar.getReservationElement(reservationDate, String(reservation.startHour))).not.toBeVisible();
+
+        await pages.adminReservationPage.selectReservationScope('Anulowane');
+        await expect(await pages.adminReservationPage.calendar.getPreviewOfReservationElement(reservationDate, String(reservation.startHour), reservation.bandName)).toBeVisible();
+        await expect(await pages.reservationPage.calendar.getReservationElement(reservationDate, String(reservation.startHour))).toBeVisible();
     });
 });
