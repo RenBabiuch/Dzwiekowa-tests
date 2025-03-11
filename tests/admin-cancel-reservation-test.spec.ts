@@ -32,7 +32,7 @@ test('Reservation with correct data is visible in the admin panel and can be can
         await pages.phoneConfirmationPage.enterUserReservationCode();
         await pages.phoneConfirmationPage.confirmReservation();
         await expect(pages.reservationPage.successfulReservationAlert).toBeVisible();
-        await pages.reservationPage.expectReservationToBeCreated(reservationDate, String(reservation.startHour), reservation.bandName, true, false);
+        await pages.reservationPage.expectReservationToBeCreated(reservationDate, reservation.startHour, reservation.bandName, true, false);
     });
 
     await test.step('After login to admin panel, reservation should be visible as well', async() => {
@@ -40,11 +40,11 @@ test('Reservation with correct data is visible in the admin panel and can be can
         await page.reload();
         await pages.adminLoginPage.loginTheUser(adminPassword);
         await expect(pages.adminReservationPage.calendarElement).toBeVisible();
-        await pages.reservationPage.expectReservationToBeCreated(reservationDate, String(reservation.startHour), reservation.bandName, false, true);
+        await pages.reservationPage.expectReservationToBeCreated(reservationDate, reservation.startHour, reservation.bandName, false, true);
     });
 
     await test.step('After clicking on the reservation window, its details with correct data should appear', async() => {
-        await pages.adminReservationPage.calendar.clickToSeeReservationDetails(reservationDate, String(reservation.startHour), reservation.bandName);
+        await pages.adminReservationPage.calendar.clickToSeeReservationDetails(reservationDate, reservation.startHour, reservation.bandName);
         await expect(pages.adminReservationDetailsPage.reservationDetailsContainer).toBeVisible();
         await pages.adminReservationDetailsPage.expectBandNameToBe(reservation.bandName);
         await pages.adminReservationDetailsPage.expectPhoneNumToBe(reservation.phone);
@@ -54,13 +54,13 @@ test('Reservation with correct data is visible in the admin panel and can be can
     });
 
     await test.step('When reservation is canceled, its preview should disappear - except canceled reservations view', async() => {
-        await pages.adminReservationPage.calendar.clickToSeeReservationDetails(reservationDate, String(reservation.startHour), reservation.bandName);
+        await pages.adminReservationPage.calendar.clickToSeeReservationDetails(reservationDate, reservation.startHour, reservation.bandName);
         await pages.adminReservationDetailsPage.cancelReservation();
-        await expect(await pages.adminReservationPage.calendar.getPreviewOfReservationElement(reservationDate, String(reservation.startHour), reservation.bandName)).not.toBeVisible();
-        await expect(await pages.reservationPage.calendar.getReservationElement(reservationDate, String(reservation.startHour))).not.toBeVisible();
+        await expect(await pages.adminReservationPage.calendar.getPreviewOfReservationElement(reservationDate, reservation.startHour, reservation.bandName)).not.toBeVisible();
+        await expect(await pages.reservationPage.calendar.getReservationElement(reservationDate, reservation.startHour)).not.toBeVisible();
 
         await pages.adminReservationPage.selectReservationScope('Anulowane');
-        await expect(await pages.adminReservationPage.calendar.getPreviewOfReservationElement(reservationDate, String(reservation.startHour), reservation.bandName)).toBeVisible();
-        await expect(await pages.reservationPage.calendar.getReservationElement(reservationDate, String(reservation.startHour))).toBeVisible();
+        await expect(await pages.adminReservationPage.calendar.getPreviewOfReservationElement(reservationDate, reservation.startHour, reservation.bandName)).toBeVisible();
+        await expect(await pages.reservationPage.calendar.getReservationElement(reservationDate, reservation.startHour)).toBeVisible();
     });
 });

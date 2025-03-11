@@ -92,7 +92,7 @@ export class Calendar {
         return this.getDayElement().nth(mapWeekDayToNumb[weekDay]).getAttribute('data-date');
     }
 
-    public async getReservationElement(date: string, startHour: string) {
+    public async getReservationElement(date: string, startHour: number) {
         const dateInRowSelector = this.page.locator(`.fc-row.fc-widget-header [data-date="${date}"]`);
         await expect(dateInRowSelector).toBeVisible();
 
@@ -109,15 +109,15 @@ export class Calendar {
             'ndz': '7'
         }
 
-        return this.page.getByTestId(`reservation-entry-${polWeekDaysToNumbMap[dayWeekNameSubstring]}-${startHour}`);
+        return this.page.getByTestId(`reservation-entry-${polWeekDaysToNumbMap[dayWeekNameSubstring]}-${String(startHour)}`);
     }
 
-    public async getPreviewOfReservationElement(date: string, startHour: string, bandName: string) {
+    public async getPreviewOfReservationElement(date: string, startHour: number, bandName: string) {
         const reservationElem = await this.getReservationElement(date, startHour);
         return reservationElem.getByText(bandName);
     }
 
-    public async expectReservationToBeVisible(date: string, startHour: string, bandName: string, adminPanel = false) {
+    public async expectReservationToBeVisible(date: string, startHour: number, bandName: string, adminPanel = false) {
         const previewOfReservationElem = await this.getPreviewOfReservationElement(date, startHour, bandName);
         const reservationElem = await this.getReservationElement(date, startHour);
 
@@ -130,7 +130,7 @@ export class Calendar {
         }
     }
 
-    public async clickToSeeReservationDetails(date: string, startHour: string, bandName: string) {
+    public async clickToSeeReservationDetails(date: string, startHour: number, bandName: string) {
         const previewOfReservationElem = await this.getPreviewOfReservationElement(date, startHour, bandName);
         await previewOfReservationElem.click();
     }

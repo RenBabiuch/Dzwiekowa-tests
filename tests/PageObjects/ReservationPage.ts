@@ -281,7 +281,7 @@ import {TimePicker} from "../components/time-picker";
         return Math.floor(Math.random() * 22);
     }
 
-    public async expectReservationToBeCreated(date: string, startHour: string, bandName: string, successfulAlert = true, adminPanel = false) {
+    public async expectReservationToBeCreated(date: string, startHour: number, bandName: string, successfulAlert = true, adminPanel = false) {
 
         if(successfulAlert) {
          await this.closeSuccessfulReservationAlert();
