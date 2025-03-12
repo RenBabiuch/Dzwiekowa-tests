@@ -116,7 +116,11 @@ import {TimePicker} from "../components/time-picker";
         return this.page.getByTestId('form-start-date');
     }
 
-    public async enterStartDate(day: string) {
+    public get startDateInputValue() {
+        return this.startDateInput.getAttribute('value');
+    }
+
+    public async enterStartDate(day: Date) {
         await this.startDateInput.click();
         await this.datePicker.selectDay(day);
     }
@@ -129,7 +133,7 @@ import {TimePicker} from "../components/time-picker";
         return this.page.getByTestId('form-end-date');
     }
 
-    public async enterEndDate(day: string) {
+    public async enterEndDate(day: Date) {
         await this.endDateInput.click();
         await this.datePicker.selectDay(day);
     }
@@ -138,7 +142,7 @@ import {TimePicker} from "../components/time-picker";
         await expect(this.endDateInput.locator('~ div').getByText(errorMessage)).toBeVisible();
     }
 
-    public async enterReservationDate(startDay: string, endDay?: string) {
+    public async enterReservationDate(startDay: Date, endDay?: Date) {
         await this.enterStartDate(startDay);
         await this.endDateInput.click();
 
@@ -206,11 +210,26 @@ import {TimePicker} from "../components/time-picker";
     public async getOnlineReservationPrice() {
 
         const getPrice = async () => {
-            const text = await this.submitWithOnlinePaymentButton.textContent()
+            const text = await this.submitWithOnlinePaymentButton.textContent();
             return text.substring(33, 35);
         }
 
         await expect(async () => {
+            const currentPrice = await getPrice();
+            await expect(currentPrice.length).toBeGreaterThan(0);
+        }).toPass();
+
+        return getPrice();
+    }
+
+    public async getCashReservationPrice() {
+
+        const getPrice = async() => {
+          const text = await this.submitWithCashPaymentButton.textContent();
+          return text.substring(38, 40);
+        };
+
+        await expect(async() => {
             const currentPrice = await getPrice();
             await expect(currentPrice.length).toBeGreaterThan(0);
         }).toPass();
@@ -226,7 +245,7 @@ import {TimePicker} from "../components/time-picker";
         await this.submitWithCashPaymentButton.click();
     }
 
-    public async fillTheReservationForm(room: roomNameType, type: reservationTypeNameType, bandName: string, phoneNum: string, startHour: string, endHour: string, startDay: string, endDay?: string ) {
+    public async fillTheReservationForm(room: roomNameType, type: reservationTypeNameType, bandName: string, phoneNum: string, startHour: string, endHour: string, startDay: Date, endDay?: Date) {
         await this.selectRehearsalRoom(room);
         await this.selectReservationType(type);
         await this.enterBandName(bandName);
@@ -253,22 +272,20 @@ import {TimePicker} from "../components/time-picker";
             "day after tomorrow": 2
         }
 
-        const today = new Date();
-        const newDate = new Date(today);
-
-        newDate.setDate(today.getDate() + dayNameToNumberMap[dayName]);
-        return String(newDate.getDate());
+        const finalDate = new Date();
+        finalDate.setDate(finalDate.getDate() + dayNameToNumberMap[dayName]);
+        return finalDate;
     }
 
     public async generateRandomHour() {
         return Math.floor(Math.random() * 22);
     }
 
-    public async expectReservationToBeCreated(date: string, startHour: string, bandName: string, successfulAlert = true) {
+    public async expectReservationToBeCreated(date: string, startHour: number, bandName: string, successfulAlert = true, adminPanel = false) {
 
         if(successfulAlert) {
          await this.closeSuccessfulReservationAlert();
         }
-        await this.calendar.expectReservationToBeVisible(date, startHour, bandName);
+        await this.calendar.expectReservationToBeVisible(date, startHour, bandName, adminPanel);
     }
 }
