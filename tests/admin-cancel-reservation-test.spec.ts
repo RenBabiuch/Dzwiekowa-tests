@@ -10,7 +10,7 @@ test.beforeEach(async ({page}) => {
 
 test('Reservation with correct data is visible in the admin panel and can be canceled', async ({page}) => {
     const reservation = {
-        bandName: 'New area band',
+        bandName: 'New area band 999',
         phone: await pages.reservationPage.generateRandomPhoneNumber(),
         date: await pages.reservationPage.getSpecificDate('tomorrow'),
         startHour: await pages.reservationPage.generateRandomHour(),
@@ -19,6 +19,7 @@ test('Reservation with correct data is visible in the admin panel and can be can
 
     const endHour = reservation.startHour + 2;
     const adminPassword = '12345';
+    const fakePhoneNum = '777222333';
     let reservationDate;
     let currentPrice;
 
@@ -53,6 +54,22 @@ test('Reservation with correct data is visible in the admin panel and can be can
         await pages.adminReservationDetailsPage.closeReservationDetails();
     });
 
+    await test.step('Reservation should not be visible in the canceled reservation view, before it is canceled', async() => {
+        await pages.adminReservationPage.selectReservationScope('Anulowane');
+        await expect(await pages.adminReservationPage.calendar.getPreviewOfReservationElement(reservationDate, reservation.startHour, reservation.bandName)).not.toBeVisible();
+    });
+
+    await test.step('After filtering reservations by phone number, only reservations with correct number should be displayed', async() => {
+        await pages.adminReservationPage.selectReservationScope('Aktywne');
+        await pages.adminReservationPage.filterReservationByPhoneNum(fakePhoneNum);
+        await expect(await pages.reservationPage.calendar.getPreviewOfReservationElement(reservationDate, reservation.startHour, reservation.bandName)).not.toBeVisible();
+        await expect(await pages.reservationPage.calendar.getReservationElement(reservationDate, reservation.startHour)).not.toBeVisible();
+
+        await pages.adminReservationPage.filterReservationByPhoneNum(reservation.phone);
+        await expect(await pages.reservationPage.calendar.getPreviewOfReservationElement(reservationDate, reservation.startHour, reservation.bandName)).toBeVisible();
+        await expect(await pages.reservationPage.calendar.getReservationElement(reservationDate, reservation.startHour)).toBeVisible();
+    });
+
     await test.step('When reservation is canceled, its preview should disappear - except canceled reservations view', async() => {
         await pages.adminReservationPage.calendar.clickToSeeReservationDetails(reservationDate, reservation.startHour, reservation.bandName);
         await pages.adminReservationDetailsPage.cancelReservation();
@@ -61,6 +78,16 @@ test('Reservation with correct data is visible in the admin panel and can be can
 
         await pages.adminReservationPage.selectReservationScope('Anulowane');
         await expect(await pages.adminReservationPage.calendar.getPreviewOfReservationElement(reservationDate, reservation.startHour, reservation.bandName)).toBeVisible();
+        await expect(await pages.reservationPage.calendar.getReservationElement(reservationDate, reservation.startHour)).toBeVisible();
+    });
+
+    await test.step('After filtering in canceled reservation view, only reservations with correct number should be displayed too', async() => {
+        await pages.adminReservationPage.filterReservationByPhoneNum(fakePhoneNum);
+        await expect(await pages.reservationPage.calendar.getPreviewOfReservationElement(reservationDate, reservation.startHour, reservation.bandName)).not.toBeVisible();
+        await expect(await pages.reservationPage.calendar.getReservationElement(reservationDate, reservation.startHour)).not.toBeVisible();
+
+        await pages.adminReservationPage.filterReservationByPhoneNum(reservation.phone);
+        await expect(await pages.reservationPage.calendar.getPreviewOfReservationElement(reservationDate, reservation.startHour, reservation.bandName)).toBeVisible();
         await expect(await pages.reservationPage.calendar.getReservationElement(reservationDate, reservation.startHour)).toBeVisible();
     });
 });
