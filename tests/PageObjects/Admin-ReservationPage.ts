@@ -22,4 +22,12 @@ export class AdminReservationPagePO {
     public async selectReservationScope(scopeName: reservationScopeType) {
         await this.getReservationScopeElement(scopeName).click();
     }
+
+    public get filterByPhoneNumInput() {
+        return this.page.getByText('Filtruj nr tel.').locator('input[type="tel"]');
+    }
+
+    public async filterReservationByPhoneNum(number: string) {
+        await this.filterByPhoneNumInput.fill(number)
+    }
 }
