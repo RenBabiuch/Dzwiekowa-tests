@@ -56,38 +56,32 @@ test('Reservation with correct data is visible in the admin panel and can be can
 
     await test.step('Reservation should not be visible in the canceled reservation view, before it is canceled', async() => {
         await pages.adminReservationPage.selectReservationScope('Anulowane');
-        await expect(await pages.adminReservationPage.calendar.getPreviewOfReservationElement(reservationDate, reservation.startHour, reservation.bandName)).not.toBeVisible();
+        await expect(await pages.adminReservationPage.calendar.getAdminReservationElement(reservationDate, reservation.startHour, reservation.bandName)).not.toBeVisible();
     });
 
     await test.step('After filtering reservations by phone number, only reservations with correct number should be displayed', async() => {
         await pages.adminReservationPage.selectReservationScope('Aktywne');
         await pages.adminReservationPage.filterReservationByPhoneNum(fakePhoneNum);
-        await expect(await pages.reservationPage.calendar.getPreviewOfReservationElement(reservationDate, reservation.startHour, reservation.bandName)).not.toBeVisible();
-        await expect(await pages.reservationPage.calendar.getReservationElement(reservationDate, reservation.startHour)).not.toBeVisible();
+        await expect(await pages.adminReservationPage.calendar.getAdminReservationElement(reservationDate, reservation.startHour, reservation.bandName)).not.toBeVisible();
 
         await pages.adminReservationPage.filterReservationByPhoneNum(reservation.phone);
-        await expect(await pages.reservationPage.calendar.getPreviewOfReservationElement(reservationDate, reservation.startHour, reservation.bandName)).toBeVisible();
-        await expect(await pages.reservationPage.calendar.getReservationElement(reservationDate, reservation.startHour)).toBeVisible();
+        await pages.adminReservationPage.calendar.expectReservationToBeVisible(reservationDate, reservation.startHour, reservation.bandName, true);
     });
 
     await test.step('When reservation is canceled, its preview should disappear - except canceled reservations view', async() => {
         await pages.adminReservationPage.calendar.clickToSeeReservationDetails(reservationDate, reservation.startHour, reservation.bandName);
         await pages.adminReservationDetailsPage.cancelReservation();
-        await expect(await pages.adminReservationPage.calendar.getPreviewOfReservationElement(reservationDate, reservation.startHour, reservation.bandName)).not.toBeVisible();
-        await expect(await pages.reservationPage.calendar.getReservationElement(reservationDate, reservation.startHour)).not.toBeVisible();
+        await expect(await pages.adminReservationPage.calendar.getAdminReservationElement(reservationDate, reservation.startHour, reservation.bandName)).not.toBeVisible();
 
         await pages.adminReservationPage.selectReservationScope('Anulowane');
-        await expect(await pages.adminReservationPage.calendar.getPreviewOfReservationElement(reservationDate, reservation.startHour, reservation.bandName)).toBeVisible();
-        await expect(await pages.reservationPage.calendar.getReservationElement(reservationDate, reservation.startHour)).toBeVisible();
+        await pages.adminReservationPage.calendar.expectReservationToBeVisible(reservationDate, reservation.startHour, reservation.bandName, true);
     });
 
     await test.step('After filtering in canceled reservation view, only reservations with correct number should be displayed too', async() => {
         await pages.adminReservationPage.filterReservationByPhoneNum(fakePhoneNum);
-        await expect(await pages.reservationPage.calendar.getPreviewOfReservationElement(reservationDate, reservation.startHour, reservation.bandName)).not.toBeVisible();
-        await expect(await pages.reservationPage.calendar.getReservationElement(reservationDate, reservation.startHour)).not.toBeVisible();
+        await expect(await pages.adminReservationPage.calendar.getAdminReservationElement(reservationDate, reservation.startHour, reservation.bandName)).not.toBeVisible();
 
         await pages.adminReservationPage.filterReservationByPhoneNum(reservation.phone);
-        await expect(await pages.reservationPage.calendar.getPreviewOfReservationElement(reservationDate, reservation.startHour, reservation.bandName)).toBeVisible();
-        await expect(await pages.reservationPage.calendar.getReservationElement(reservationDate, reservation.startHour)).toBeVisible();
+        await pages.adminReservationPage.calendar.expectReservationToBeVisible(reservationDate, reservation.startHour, reservation.bandName, true);
     });
 });
