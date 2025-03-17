@@ -24,7 +24,7 @@ test('Reservation with correct data is visible in the admin panel and can be can
     let currentPrice;
 
     await test.step('Create a valid reservation in user`s view - it should be visible in calendar', async() => {
-        await pages.reservationPage.fillTheReservationForm('Browar Miesczanski', 'Zespol', reservation.bandName, reservation.phone, String(reservation.startHour), String(endHour), reservation.date);
+        await pages.reservationPage.fillTheReservationForm('Browar Miesczanski', 'Zespol', reservation.bandName, reservation.phone, reservation.startHour, endHour, reservation.date);
 
         reservationDate = await pages.reservationPage.startDateInputValue;
         currentPrice = await pages.reservationPage.getCashReservationPrice();

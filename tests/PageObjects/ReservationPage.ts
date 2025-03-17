@@ -157,7 +157,7 @@ import {TimePicker} from "../components/time-picker";
         return this.page.getByTestId('form-start-time');
     }
 
-    public async selectStartTime(hour: string) {
+    public async selectStartTime(hour: number) {
         await this.startTimeInput.click();
         await this.timePicker.selectTime(hour);
     }
@@ -166,12 +166,12 @@ import {TimePicker} from "../components/time-picker";
         return this.page.getByTestId('form-end-time');
     }
 
-    public async selectEndTime(hour: string) {
+    public async selectEndTime(hour: number) {
         await this.endTimeInput.click();
         await this.timePicker.selectTime(hour);
     }
 
-    public async selectReservationTime(startHour: string, endHour: string) {
+    public async selectReservationTime(startHour: number, endHour: number) {
         await this.selectStartTime(startHour);
         await this.selectEndTime(endHour);
     }
@@ -245,7 +245,7 @@ import {TimePicker} from "../components/time-picker";
         await this.submitWithCashPaymentButton.click();
     }
 
-    public async fillTheReservationForm(room: roomNameType, type: reservationTypeNameType, bandName: string, phoneNum: string, startHour: string, endHour: string, startDay: Date, endDay?: Date) {
+    public async fillTheReservationForm(room: roomNameType, type: reservationTypeNameType, bandName: string, phoneNum: string, startHour: number, endHour: number, startDay: Date, endDay?: Date) {
         await this.selectRehearsalRoom(room);
         await this.selectReservationType(type);
         await this.enterBandName(bandName);
