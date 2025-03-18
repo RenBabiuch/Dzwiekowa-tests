@@ -4,8 +4,8 @@ export class TimePicker {
     constructor(private page: Page) {
     }
 
-    public async selectTime(hour: string) {
-        await this.page.locator('span').getByText(hour, {exact: true}).last().click({ force: true });
+    public async selectTime(hour: number) {
+        await this.page.locator('span').getByText(String(hour), {exact: true}).last().click({ force: true });
         await this.accept();
     }
 

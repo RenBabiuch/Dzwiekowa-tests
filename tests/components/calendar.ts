@@ -117,6 +117,10 @@ export class Calendar {
         return reservationElem.getByText(bandName);
     }
 
+    public async getAdminReservationElement(date: string, startHour: number, bandName: string) {
+        return await this.getPreviewOfReservationElement(date, startHour, bandName);
+    }
+
     public async expectReservationToBeVisible(date: string, startHour: number, bandName: string, adminPanel = false) {
         const previewOfReservationElem = await this.getPreviewOfReservationElement(date, startHour, bandName);
         const reservationElem = await this.getReservationElement(date, startHour);
