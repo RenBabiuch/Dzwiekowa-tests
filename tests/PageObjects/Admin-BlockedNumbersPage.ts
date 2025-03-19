@@ -15,9 +15,15 @@ export class AdminBlockedNumbersPagePO {
         await this.blockNumberInput.fill(phoneNumber);
     }
 
-    public async selectBlockType(blockType: 'Zablokowany' | 'Wymuś płatność online') {
+    public async selectBlockType(blockType: 'blocked' | 'enforce-online-payment') {
+
+        const engToPolishNameMap = {
+            'blocked': 'Zablokowany',
+            'enforce-online-payment': 'Wymuś płatność online'
+        }
+
         await this.page.getByTestId('block-new-type').click();
-        await this.page.getByRole('menuitem').getByText(blockType).click();
+        await this.page.getByRole('menuitem').getByText(engToPolishNameMap[blockType]).click();
     }
 
     public get blockNumberReasonInput() {

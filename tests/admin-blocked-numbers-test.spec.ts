@@ -28,7 +28,7 @@ test('Complete blocking phone numbers works', async({page}) => {
         await pages.adminLoginPage.loginTheUser(adminPassword);
         await pages.adminReservationPage.adminHeader.goToBlockNumbers();
         await pages.adminBlockedNumbersPage.enterNumberToBlock(blockedNumber);
-        await pages.adminBlockedNumbersPage.selectBlockType('Zablokowany');
+        await pages.adminBlockedNumbersPage.selectBlockType('blocked');
         await pages.adminBlockedNumbersPage.enterBlockNumberReason(reasonForBlocking)
         await pages.adminBlockedNumbersPage.confirmNumberBlocking();
         await expect(pages.adminBlockedNumbersPage.blockedNumbersContainer).toBeVisible();
