@@ -49,7 +49,7 @@ test.describe('Reservation tests', async () => {
             await pages.reservationPage.enterPhoneNumber(generated.phoneNum);
             await pages.reservationPage.enterReservationDate(reservation.date);
             await pages.reservationPage.selectReservationTime(generated.startHour, reservation.endHour);
-            await pages.reservationPage.expectSelectedTimeToBe(String(generated.startHour), String(reservation.endHour));
+            await pages.reservationPage.expectSelectedTimeToBe(generated.startHour, reservation.endHour);
         });
 
         const reservationDate = await pages.reservationPage.startDateInput.getAttribute('value');
