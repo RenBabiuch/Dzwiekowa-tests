@@ -16,6 +16,14 @@ export class AdminHeader {
         await this.manageRoomButton.click();
     }
 
+    public get blockedNumbersButton() {
+        return this.page.getByTestId('manage-blocked-numbers');
+    }
+
+    public async goToBlockNumbers() {
+        await this.blockedNumbersButton.click();
+    }
+
     public get logoutButton() {
         return this.page.getByTestId('logout');
     }

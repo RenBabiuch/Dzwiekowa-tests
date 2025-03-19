@@ -9,6 +9,7 @@ import {AdminLoginPagePO} from "./Admin-LoginPage";
 import {AdminReservationPagePO} from "./Admin-ReservationPage";
 import {AdminManageRoomsPagePO} from "./Admin-ManageRoomsPage";
 import {AdminReservationDetailsPagePO} from "./Admin-ReservationDetailsPage";
+import {AdminBlockedNumbersPagePO} from "./Admin-BlockedNumbersPage";
 
 export default function initialise(page: Page) {
     return{
@@ -21,6 +22,7 @@ export default function initialise(page: Page) {
         adminLoginPage: new AdminLoginPagePO(page),
         adminReservationPage: new AdminReservationPagePO(page),
         adminManageRoomsPage: new AdminManageRoomsPagePO(page),
-        adminReservationDetailsPage: new AdminReservationDetailsPagePO(page)
+        adminReservationDetailsPage: new AdminReservationDetailsPagePO(page),
+        adminBlockedNumbersPage: new AdminBlockedNumbersPagePO(page)
     }
 }
