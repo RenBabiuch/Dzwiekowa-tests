@@ -176,18 +176,18 @@ import {TimePicker} from "../components/time-picker";
         await this.selectEndTime(endHour);
     }
 
-    public async expectSelectedTimeToBe(startHour: string, endHour: string) {
+    public async expectSelectedTimeToBe(startHour: number, endHour: number) {
 
-        if (startHour.length === 1) {
-            await expect(this.startTimeInput).toHaveValue(`0${startHour}:00`);
+        if (String(startHour).length === 1) {
+            await expect(this.startTimeInput).toHaveValue(`0${String(startHour)}:00`);
         } else {
-            await expect(this.startTimeInput).toHaveValue(`${startHour}:00`);
+            await expect(this.startTimeInput).toHaveValue(`${String(startHour)}:00`);
         }
 
-        if (endHour.length === 1) {
-            await expect(this.endTimeInput).toHaveValue(`0${endHour}:00`);
+        if (String(endHour).length === 1) {
+            await expect(this.endTimeInput).toHaveValue(`0${String(endHour)}:00`);
         } else {
-            await expect(this.endTimeInput).toHaveValue(`${endHour}:00`);
+            await expect(this.endTimeInput).toHaveValue(`${String(endHour)}:00`);
         }
     }
 
