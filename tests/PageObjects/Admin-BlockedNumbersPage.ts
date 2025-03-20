@@ -1,6 +1,8 @@
 import {Page} from "@playwright/test";
 import {AdminHeader} from "../components/admin-header";
 
+type blockType = 'blocked' | 'enforce-online-payment';
+
 export class AdminBlockedNumbersPagePO {
     constructor(private page: Page) {
     }
@@ -15,7 +17,7 @@ export class AdminBlockedNumbersPagePO {
         await this.blockNumberInput.fill(phoneNumber);
     }
 
-    public async selectBlockType(blockType: 'blocked' | 'enforce-online-payment') {
+    public async selectBlockType(blockName: blockType) {
 
         const engToPolishNameMap = {
             'blocked': 'Zablokowany',
@@ -23,7 +25,7 @@ export class AdminBlockedNumbersPagePO {
         }
 
         await this.page.getByTestId('block-new-type').click();
-        await this.page.getByRole('menuitem').getByText(engToPolishNameMap[blockType]).click();
+        await this.page.getByRole('menuitem').getByText(engToPolishNameMap[blockName]).click();
     }
 
     public get blockNumberReasonInput() {
@@ -32,6 +34,12 @@ export class AdminBlockedNumbersPagePO {
 
     public async enterBlockNumberReason(reason: string) {
         await this.blockNumberReasonInput.fill(reason);
+    }
+
+    public async fillTheBlockNumberForm(phoneNumber: string, blockName: blockType, reason: string) {
+        await this.enterNumberToBlock(phoneNumber);
+        await this.selectBlockType(blockName);
+        await this.enterBlockNumberReason(reason);
     }
 
     public get saveButton() {
