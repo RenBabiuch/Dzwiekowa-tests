@@ -43,7 +43,6 @@ test.describe('Reservation tests', async () => {
 
         await test.step('Fill the form with correct data', async () => {
             await pages.reservationPage.selectRehearsalRoom(roomsName.num2);
-            await pages.reservationPage.generateRandomHour();
             await pages.reservationPage.selectReservationType(reservationType.band);
             await pages.reservationPage.enterBandName(reservation.bandName);
             await pages.reservationPage.enterPhoneNumber(generated.phoneNum);

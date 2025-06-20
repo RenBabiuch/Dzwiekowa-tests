@@ -20,7 +20,7 @@ import {TimePicker} from "../components/time-picker";
     }
 
     public get rehearsalRoomElement() {
-        return this.page.getByTestId('form-room');
+        return this.page.getByTestId('form-room').first();
     }
 
     public async selectRehearsalRoom(roomName: roomNameType) {
@@ -30,11 +30,11 @@ import {TimePicker} from "../components/time-picker";
             'Stary Mlyn': '2'
         }
 
-        await this.rehearsalRoomElement.locator('button').click();
-        await expect(this.page.getByRole('menu')).toBeVisible();
+        await this.rehearsalRoomElement.click();
+        await expect(this.page.getByRole('listbox')).toBeVisible();
 
         if (roomName === 'Wszystkie') {
-            await this.page.getByRole('menuitem', {name: 'Wszystkie'}).click();
+            await this.page.getByRole('option').getByText('Wszystkie', {exact: true}).click();
         } else {
             await this.page.getByTestId(`form-room-${roomNameToNumberMap[roomName]}`).click();
         }
@@ -45,7 +45,7 @@ import {TimePicker} from "../components/time-picker";
     }
 
     public get reservationTypeButton() {
-        return this.page.locator('[id^="undefined-undefined-Typrezerwacji-"] button');
+        return this.page.getByTestId('form-reservation-type').first();
     }
 
     public async selectReservationType(typeName: reservationTypeNameType) {
@@ -57,10 +57,10 @@ import {TimePicker} from "../components/time-picker";
         }
 
         await this.reservationTypeButton.click();
-        await expect(this.page.getByRole('menu')).toBeVisible();
+        await expect(this.page.getByRole('listbox')).toBeVisible();
 
         if (typeName === 'Wybierz...') {
-            await this.page.getByRole('menuitem', {name: 'Wybierz...'}).click();
+            await this.page.getByRole('option').getByText('Wybierz...').click();
         } else {
             await this.page.getByTestId(this.reservationTypeIdSelector + `-${typeNameToNumberMap[typeName]}`).click();
         }
@@ -73,7 +73,7 @@ import {TimePicker} from "../components/time-picker";
     }
 
     public get bandNameInput() {
-        return this.page.getByTestId('form-band-name');
+        return this.page.getByTestId('form-band-name').locator('input');
     }
 
     public async enterBandName(name: string) {
@@ -85,7 +85,7 @@ import {TimePicker} from "../components/time-picker";
     }
 
     public get phoneNumberInput() {
-        return this.page.getByTestId('form-phone-number');
+        return this.page.getByTestId('form-phone-number').locator('input');
     }
 
     public async enterPhoneNumber(number: string) {
@@ -121,7 +121,7 @@ import {TimePicker} from "../components/time-picker";
     }
 
     public async enterStartDate(day: Date) {
-        await this.startDateInput.click();
+        await this.startDateInput.locator('button').click();
         await this.datePicker.selectDay(day);
     }
 
@@ -134,7 +134,7 @@ import {TimePicker} from "../components/time-picker";
     }
 
     public async enterEndDate(day: Date) {
-        await this.endDateInput.click();
+        await this.endDateInput.locator('button').click();
         await this.datePicker.selectDay(day);
     }
 
@@ -144,12 +144,13 @@ import {TimePicker} from "../components/time-picker";
 
     public async enterReservationDate(startDay: Date, endDay?: Date) {
         await this.enterStartDate(startDay);
-        await this.endDateInput.click();
+        await this.endDateInput.locator('button').click();
 
         if (endDay) {
             await this.datePicker.selectDay(endDay);
         } else {
             await this.datePicker.selectDay(startDay);
+            await this.timePicker.accept();
         }
     }
 
