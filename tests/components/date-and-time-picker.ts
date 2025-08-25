@@ -1,6 +1,6 @@
 import {expect, Page} from "@playwright/test";
 
-export class DatePicker {
+export class DateAndTimePicker {
     constructor(private page: Page) {
     }
 
@@ -36,5 +36,23 @@ export class DatePicker {
             await expect(this.page.getByText(numbToMonthsMap[targetMonth])).toBeVisible();
             await this.page.getByRole('gridcell', {name: `${targetDay}`, exact: true}).nth(0).click();
         }
+    }
+
+    public async selectTime(hour: number) {
+        await this.page.locator('span').getByText(String(hour), {exact: true}).last().click({ force: true });
+    }
+
+    public async selectAndApproveDayAndTime(day: Date, hour: number) {
+        await this.selectDay(day);
+        await this.selectTime(hour);
+        await this.accept();
+    }
+
+    public async cancel() {
+        await this.page.getByRole('button', {name: 'Cancel'}).click();
+    }
+
+    public async accept() {
+        await this.page.getByRole('button', {name: 'OK'}).click();
     }
 }
