@@ -5,7 +5,7 @@ export class AdminLoginPagePO {
     }
 
     public get passwordInput() {
-        return this.page.getByTestId('password-input');
+        return this.page.getByTestId('password-input').locator('input');
     }
 
     public async enterUserPassword(password: string) {

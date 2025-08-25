@@ -14,7 +14,7 @@ test('Log out the user works', async({page}) => {
         await pages.adminLoginPage.loginTheUser(password);
         await expect(pages.adminReservationPage.adminHeader.loggedToAdminPanelInfo).toBeVisible();
         await pages.adminReservationPage.adminHeader.goToManageRooms();
-        await expect(pages.adminManageRoomsPage.getRoomContainer('Browar Miesczanski')).toBeVisible();
+        await expect(pages.adminManageRoomsPage.getRoomContainer('Browar')).toBeVisible();
     });
 
     await test.step('After logging out - the user should be redirected to the login page', async() => {

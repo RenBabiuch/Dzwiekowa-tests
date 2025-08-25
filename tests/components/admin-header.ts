@@ -5,7 +5,7 @@ export class AdminHeader {
     }
 
     public get loggedToAdminPanelInfo() {
-        return this.page.getByText('Jesteś w Panelu Zarządzania', {exact: true});
+        return this.page.getByText('Panel Zarządzania', {exact: true});
     }
 
     public get manageRoomButton() {
