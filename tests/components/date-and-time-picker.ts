@@ -6,7 +6,7 @@ export class DateAndTimePicker {
 
     public async selectDay(day: Date) {
 
-        const monthAndYearInCalendar = await this.page.locator('.MuiPickersCalendarHeader-label').textContent();
+        const monthAndYearInCalendar = await this.page.locator('.MuiPickersCalendarHeader-label').first().textContent();
         const monthInCalendarSubstring = monthAndYearInCalendar.split('').reverse().join('').substring(5);
         const monthInCalendar = monthInCalendarSubstring.split('').reverse().join('');
 
@@ -46,6 +46,7 @@ export class DateAndTimePicker {
         await this.selectDay(day);
         await this.selectTime(hour);
         await this.accept();
+        await expect(this.page.locator('.MuiDateCalendar-root')).not.toBeVisible();
     }
 
     public async cancel() {

@@ -5,7 +5,7 @@ export class PhoneConfirmationPagePO {
     }
 
     public get verifyPhoneNumberInput() {
-        return this.page.getByTestId('form-verify-number');
+        return this.page.getByTestId('form-verify-number').locator('input');
     }
 
     public async expectEnteredNumberToBeVisible(phoneNumber: string) {
@@ -14,7 +14,7 @@ export class PhoneConfirmationPagePO {
     }
 
     public get reservationCodeInput() {
-        return this.page.getByTestId('form-verify-reservation-code')
+        return this.page.getByTestId('form-verify-reservation-code').locator('input');
     }
 
     public async enterUserReservationCode(defaultCode = 'GRbG8abEZ0Q') {

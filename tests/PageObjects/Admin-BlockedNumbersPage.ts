@@ -10,7 +10,7 @@ export class AdminBlockedNumbersPagePO {
     adminHeader = new AdminHeader(this.page);
 
     public get blockNumberInput() {
-        return this.page.getByTestId('block-new-number');
+        return this.page.getByTestId('block-new-number').locator('input');
     }
 
     public async enterNumberToBlock(phoneNumber: string) {
@@ -24,12 +24,12 @@ export class AdminBlockedNumbersPagePO {
             'enforce-online-payment': 'Wymuś płatność online'
         }
 
-        await this.page.getByTestId('block-new-type').click();
-        await this.page.getByRole('menuitem').getByText(engToPolishNameMap[blockName]).click();
+        await this.page.getByTestId('block-new-type').first().click();
+        await this.page.getByRole('listbox').getByText(engToPolishNameMap[blockName]).click();
     }
 
     public get blockNumberReasonInput() {
-        return this.page.getByTestId('block-new-reason');
+        return this.page.getByTestId('block-new-reason').locator('input');
     }
 
     public async enterBlockNumberReason(reason: string) {
