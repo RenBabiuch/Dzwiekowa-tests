@@ -25,12 +25,11 @@ test('Successful online payment', async() => {
         await pages.reservationPage.selectReservationType('Nagrywka');
         await pages.reservationPage.enterBandName(reservation.bandName);
         await pages.reservationPage.enterPhoneNumber(reservation.phone);
-        await pages.reservationPage.enterReservationDate(reservation.date);
-        await pages.reservationPage.selectReservationTime(reservation.startHour, endHour);
+        await pages.reservationPage.enterDatesAndTime(reservation.date, reservation.startHour, endHour);
         await pages.reservationPage.selectAgreementCheckbox();
     });
 
-    const reservationDate = await pages.reservationPage.startDateInput.getAttribute('value');
+    const reservationDate = await pages.reservationPage.getStartDateValue();
     const currentReservationPrice = await pages.reservationPage.getOnlineReservationPrice();
 
     await test.step('Go to online payment and enter reservation code', async() => {

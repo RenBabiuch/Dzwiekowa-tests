@@ -23,7 +23,7 @@ const roomsName = {
 
 const reservationType = {
     none: 'Wybierz...',
-    band: "Zespol",
+    band: "Zespół",
     solo: 'Solo',
     records: 'Nagrywka',
 } as const;
@@ -33,7 +33,7 @@ const emptyFieldErrorMessage = 'Pole jest wymagane';
 
 test.describe('Reservation tests', async () => {
 
-    test('Successful reservation with correct data', async () => {
+    test('Successful first online-reservation for new users', async () => {
 
         const reservation = {
             bandName: 'Chleb i Kawa',
@@ -41,23 +41,25 @@ test.describe('Reservation tests', async () => {
             endHour: generated.startHour + 1,
         } as const;
 
-        await test.step('Fill the form with correct data', async () => {
+        await test.step('Fill the form - after entering new phone number, cash payment button should disappear', async () => {
             await pages.reservationPage.selectRehearsalRoom(roomsName.num2);
             await pages.reservationPage.selectReservationType(reservationType.band);
             await pages.reservationPage.enterBandName(reservation.bandName);
+            await expect(pages.reservationPage.submitWithCashPaymentButton).toBeVisible();
             await pages.reservationPage.enterPhoneNumber(generated.phoneNum);
-            await pages.reservationPage.enterReservationDate(reservation.date);
-            await pages.reservationPage.selectReservationTime(generated.startHour, reservation.endHour);
+            await pages.reservationPage.enterDatesAndTime(reservation.date, generated.startHour, reservation.endHour);
             await pages.reservationPage.expectSelectedTimeToBe(generated.startHour, reservation.endHour);
+            await expect(pages.reservationPage.submitWithCashPaymentButton).not.toBeVisible();
         });
 
-        const reservationDate = await pages.reservationPage.startDateInput.getAttribute('value');
+        const reservationDate = await pages.reservationPage.getStartDateValue();
 
         await test.step('Select the checkbox and send the form', async () => {
             await pages.reservationPage.selectAgreementCheckbox();
-            await pages.reservationPage.submitWithCashPayment();
+            await pages.reservationPage.submitWithOnlinePayment();
         });
 
+        // todo - cash test (next reservation)
         await test.step('After entering correct reservation code - the reservation should be created properly', async () => {
             await pages.phoneConfirmationPage.expectEnteredNumberToBeVisible(generated.phoneNum);
             await pages.phoneConfirmationPage.enterUserReservationCode();
@@ -86,8 +88,8 @@ test.describe('Reservation tests', async () => {
         });
 
         await test.step('After selecting date from the past, the error message should be visible', async () => {
-            await pages.reservationPage.enterReservationDate(reservation.date);
-            await pages.reservationPage.selectReservationTime(generated.startHour, reservation.endHour);
+            await pages.reservationPage.enterReservationDates(reservation.date);
+            await pages.reservationPage.enterReservationTime(generated.startHour, reservation.endHour);
             await pages.reservationPage.selectAgreementCheckbox();
             await pages.reservationPage.submitWithCashPayment();
             await pages.reservationPage.expectStartDateErrorMessageToBe(lateReservationErrorMessage);
@@ -109,11 +111,11 @@ test.describe('Reservation tests', async () => {
             await pages.reservationPage.selectReservationType(reservationType.band);
             await pages.reservationPage.enterBandName(reservation.bandName);
             await pages.reservationPage.enterPhoneNumber(generated.phoneNum);
-            await pages.reservationPage.enterReservationDate(reservation.date);
+            await pages.reservationPage.enterReservationDates(reservation.date);
         });
 
         await test.step('After entering an end-hour that is earlier than the start-hour, error message should be visible', async () => {
-            await pages.reservationPage.selectReservationTime(generated.startHour, reservation.endHour);
+            await pages.reservationPage.enterReservationTime(generated.startHour, reservation.endHour);
             await pages.reservationPage.selectAgreementCheckbox();
             await pages.reservationPage.submitWithOnlinePayment();
             await pages.reservationPage.expectEndDateErrorMessageToBe(endHourErrorMessage);
@@ -135,11 +137,11 @@ test.describe('Reservation tests', async () => {
             await pages.reservationPage.selectReservationType(reservationType.records);
             await pages.reservationPage.enterBandName(reservation.bandName);
             await pages.reservationPage.enterPhoneNumber(generated.phoneNum);
-            await pages.reservationPage.enterReservationDate(reservation.date);
+            await pages.reservationPage.enterReservationDates(reservation.date);
         });
 
         await test.step('After entering the same start and end-hour, error message should be visible', async() => {
-            await pages.reservationPage.selectReservationTime(generated.startHour, reservation.endHour);
+            await pages.reservationPage.enterReservationTime(generated.startHour, reservation.endHour);
             await pages.reservationPage.selectAgreementCheckbox();
             await pages.reservationPage.submitWithCashPayment();
             await pages.reservationPage.expectEndDateErrorMessageToBe(hourErrorMessage);
@@ -162,7 +164,7 @@ test.describe('Reservation tests', async () => {
             await pages.reservationPage.fillTheReservationForm(roomsName.num2, reservationType.band, reservation.bandName1, generated.phoneNum, generated.startHour, reservation.endHour, reservation.date);
             await pages.reservationPage.submitWithCashPayment();
 
-            reservationDate = await pages.reservationPage.startDateInput.getAttribute('value');
+            reservationDate = await pages.reservationPage.getStartDateValue();
 
             await pages.phoneConfirmationPage.enterUserReservationCode();
             await pages.phoneConfirmationPage.confirmReservation();
@@ -195,8 +197,8 @@ test.describe('Reservation tests', async () => {
         await test.step('Fill the rest of the form with correct data', async() => {
             await pages.reservationPage.enterBandName(reservation.bandName);
             await pages.reservationPage.enterPhoneNumber(generated.phoneNum);
-            await pages.reservationPage.enterReservationDate(reservation.date);
-            await pages.reservationPage.selectReservationTime(generated.startHour, reservation.endHour);
+            await pages.reservationPage.enterReservationDates(reservation.date);
+            await pages.reservationPage.enterReservationTime(generated.startHour, reservation.endHour);
             await pages.reservationPage.selectAgreementCheckbox();
             await pages.reservationPage.submitWithCashPayment();
         });
@@ -221,8 +223,8 @@ test.describe('Reservation tests', async () => {
             await pages.reservationPage.selectRehearsalRoom(roomsName.num1);
             await pages.reservationPage.enterBandName(reservation.bandName);
             await pages.reservationPage.enterPhoneNumber(generated.phoneNum);
-            await pages.reservationPage.enterReservationDate(reservation.date);
-            await pages.reservationPage.selectReservationTime(generated.startHour, reservation.endHour)
+            await pages.reservationPage.enterReservationDates(reservation.date);
+            await pages.reservationPage.enterReservationTime(generated.startHour, reservation.endHour)
             await pages.reservationPage.selectAgreementCheckbox();
             await pages.reservationPage.submitWithOnlinePayment();
         });
@@ -244,8 +246,8 @@ test.describe('Reservation tests', async () => {
             await pages.reservationPage.selectReservationType(reservationType.records);
             await expect(pages.reservationPage.bandNameInput).toBeEmpty();
             await pages.reservationPage.enterPhoneNumber(generated.phoneNum);
-            await pages.reservationPage.enterReservationDate(reservation.date);
-            await pages.reservationPage.selectReservationTime(generated.startHour, reservation.endHour);
+            await pages.reservationPage.enterReservationDates(reservation.date);
+            await pages.reservationPage.enterReservationTime(generated.startHour, reservation.endHour);
             await pages.reservationPage.selectAgreementCheckbox();
             await pages.reservationPage.submitWithCashPayment();
         });
@@ -268,8 +270,8 @@ test.describe('Reservation tests', async () => {
             await pages.reservationPage.selectReservationType(reservationType.records);
             await pages.reservationPage.enterBandName(reservation.bandName);
             await expect(pages.reservationPage.phoneNumberInput).toBeEmpty();
-            await pages.reservationPage.enterReservationDate(reservation.date);
-            await pages.reservationPage.selectReservationTime(generated.startHour, reservation.endHour);
+            await pages.reservationPage.enterReservationDates(reservation.date);
+            await pages.reservationPage.enterReservationTime(generated.startHour, reservation.endHour);
             await pages.reservationPage.selectAgreementCheckbox();
             await pages.reservationPage.submitWithCashPayment();
         });
@@ -293,8 +295,7 @@ test.describe('Reservation tests', async () => {
             await pages.reservationPage.enterBandName(reservation.bandName);
             await pages.reservationPage.enterPhoneNumber(generated.phoneNum);
             await pages.reservationPage.enterStartDate(reservation.date);
-            await expect(pages.reservationPage.endDateInput).toBeEmpty();
-            await pages.reservationPage.selectStartTime(generated.startHour);
+            await pages.reservationPage.enterStartTime(generated.startHour);
             await pages.reservationPage.selectAgreementCheckbox();
             await pages.reservationPage.submitWithCashPayment();
         });
@@ -317,8 +318,8 @@ test.describe('Reservation tests', async () => {
             await pages.reservationPage.selectReservationType(reservationType.records);
             await pages.reservationPage.enterBandName(reservation.bandName);
             await pages.reservationPage.enterPhoneNumber(generated.phoneNum);
-            await pages.reservationPage.enterReservationDate(reservation.date);
-            await pages.reservationPage.selectReservationTime(generated.startHour, reservation.endHour);
+            await pages.reservationPage.enterReservationDates(reservation.date);
+            await pages.reservationPage.enterReservationTime(generated.startHour, reservation.endHour);
         });
 
         await test.step('After sending the form without agreement checked, the form should still be visible with the entered data', async() => {

@@ -42,7 +42,7 @@ test('Complete blocking phone numbers works', async({page}) => {
     await test.step('Go to create reservation with blocked number - the phone number error message should appear', async() => {
         await page.goto('/');
         await page.reload();
-        await pages.reservationPage.fillTheReservationForm('Browar Miesczanski', 'Zespol', reservation.bandName, blockedNumber, reservation.startHour, endHour, reservation.date);
+        await pages.reservationPage.fillTheReservationForm('Browar Miesczanski', 'Zespół', reservation.bandName, blockedNumber, reservation.startHour, endHour, reservation.date);
         await pages.reservationPage.submitWithCashPayment();
         await pages.reservationPage.expectPhoneNumErrorMessageToBe(phoneNumErrorMessage);
     });
@@ -57,8 +57,8 @@ test('Complete blocking phone numbers works', async({page}) => {
 
         await page.goto('/');
         await page.reload();
-        await pages.reservationPage.fillTheReservationForm('Browar Miesczanski', 'Zespol', reservation.bandName, blockedNumber, reservation.startHour, endHour, reservation.date);
-        reservationDate = await pages.reservationPage.startDateInput.getAttribute('value');
+        await pages.reservationPage.fillTheReservationForm('Browar Miesczanski', 'Zespół', reservation.bandName, blockedNumber, reservation.startHour, endHour, reservation.date);
+        reservationDate = await pages.reservationPage.getStartDateValue();
         await pages.reservationPage.submitWithCashPayment();
         await pages.reservationPage.expectReservationToBeCreated(reservationDate, reservation.startHour, reservation.bandName, true);
     });
@@ -97,7 +97,7 @@ test('Blocking phone number to cash payment works', async({page}) => {
         await page.goto('/');
         await page.reload();
         await pages.reservationPage.fillTheReservationForm('Stary Mlyn', 'Nagrywka', reservation.bandName, blockedNumber, reservation.startHour, endHour, reservation.date);
-        reservationDate = await pages.reservationPage.startDateInput.getAttribute('value');
+        reservationDate = await pages.reservationPage.getStartDateValue();
         await pages.reservationPage.submitWithCashPayment();
         await pages.reservationPage.expectReservationToBeCreated(reservationDate, reservation.startHour, reservation.bandName, true);
     });
