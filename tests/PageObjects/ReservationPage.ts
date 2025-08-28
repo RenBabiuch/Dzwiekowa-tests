@@ -2,19 +2,26 @@ import {expect, Page} from "@playwright/test";
 import {Calendar} from "../components/calendar";
 import {DateAndTimePicker} from "../components/date-and-time-picker";
 
-    type roomNameType = 'Wszystkie' | 'Browar Miesczanski' | 'Stary Mlyn';
-    type reservationTypeNameType = 'Wybierz...' | 'Zespół' | 'Solo' | 'Nagrywka';
-    type dayNameType = 'yesterday' | 'today' | 'tomorrow' | 'day after tomorrow';
+type roomNameType = 'Wszystkie' | 'Browar Miesczanski' | 'Stary Mlyn';
+type reservationTypeNameType = 'Wybierz...' | 'Zespół' | 'Solo' | 'Nagrywka';
+type dayNameType = 'yesterday' | 'today' | 'tomorrow' | 'day after tomorrow';
 
-    export class ReservationPagePO {
+export class ReservationPagePO {
     constructor(private page: Page) {
     }
 
     calendar = new Calendar(this.page);
     dateAndTimePicker = new DateAndTimePicker(this.page);
 
+    reservationTypeIdSelector = 'form-reservation-type';
+    formInputFieldSelector = this.page.locator('.form__input-field');
+    bandNameFieldSelector = this.page.getByTestId('form-band-name');
+    phoneNumberFieldSelector = this.page.getByTestId('form-phone-number');
+    startDateAndTimeFieldSelector = this.page.getByTestId('form-start-date');
+    endDateAndTimeFieldSelector = this.page.getByTestId('form-end-date');
+
     public get reservationFormElement() {
-        return this.page.locator('.reservation-form-container');
+        return this.page.locator('.reservation__form');
     }
 
     public get rehearsalRoomElement() {
@@ -43,7 +50,7 @@ import {DateAndTimePicker} from "../components/date-and-time-picker";
     }
 
     public get reservationTypeButton() {
-        return this.page.getByTestId('form-reservation-type').first();
+        return this.page.getByTestId(this.reservationTypeIdSelector).getByRole('combobox');
     }
 
     public async selectReservationType(typeName: reservationTypeNameType) {
@@ -51,8 +58,8 @@ import {DateAndTimePicker} from "../components/date-and-time-picker";
         const typeNameToNumberMap = {
             'Solo': '1',
             'Nagrywka': '2',
-            // todo - dodać: solo z talerzami
-            'Zespół': '5',
+            'Solo z talerzami': '3',
+            'Zespół': '4',
         }
 
         await this.reservationTypeButton.click();
@@ -65,14 +72,12 @@ import {DateAndTimePicker} from "../components/date-and-time-picker";
         }
     }
 
-    reservationTypeIdSelector = 'form-reservation-type';
-
     public async expectReservationTypeErrorMessageToBe(errorMessage: string) {
-        await expect(this.page.getByTestId(this.reservationTypeIdSelector)).toContainText(errorMessage);
+        await expect(this.page.getByTestId(this.reservationTypeIdSelector).first()).toContainText(errorMessage);
     }
 
     public get bandNameInput() {
-        return this.page.getByTestId('form-band-name').locator('input');
+        return this.bandNameFieldSelector.locator('input');
     }
 
     public async enterBandName(name: string) {
@@ -80,11 +85,11 @@ import {DateAndTimePicker} from "../components/date-and-time-picker";
     }
 
     public async expectBandNameErrorMessageToBe(errorMessage: string) {
-        await expect(this.bandNameInput.locator('~ div').getByText(errorMessage)).toBeVisible();
+        await expect(this.bandNameFieldSelector.first()).toContainText(errorMessage);
     }
 
     public get phoneNumberInput() {
-        return this.page.getByTestId('form-phone-number').locator('input');
+        return this.phoneNumberFieldSelector.locator('input');
     }
 
     public async enterPhoneNumber(number: string) {
@@ -93,7 +98,7 @@ import {DateAndTimePicker} from "../components/date-and-time-picker";
     }
 
     public async expectPhoneNumErrorMessageToBe(errorMessage: string) {
-        await expect(this.phoneNumberInput.locator('~ div').getByText(errorMessage)).toBeVisible();
+        await expect(this.phoneNumberFieldSelector.first()).toContainText(errorMessage);
     }
 
     public async generateRandomPhoneNumber() {
@@ -109,20 +114,17 @@ import {DateAndTimePicker} from "../components/date-and-time-picker";
         return randomBeginningValue + String(randomNum);
     }
 
-    dateClass = this.page.locator('.form__input-date');
-    startDateAndTimeSelector = this.page.getByTestId('form-start-date');
-
     public async getStartDateValue() {
 
-        const day = await this.startDateAndTimeSelector.locator('[aria-label="Day"]').textContent();
-        const month = await this.startDateAndTimeSelector.locator('[aria-label="Month"]').textContent();
-        const year = await this.startDateAndTimeSelector.locator('[aria-label="Year"]').textContent();
+        const day = await this.startDateAndTimeFieldSelector.locator('[aria-label="Day"]').textContent();
+        const month = await this.startDateAndTimeFieldSelector.locator('[aria-label="Month"]').textContent();
+        const year = await this.startDateAndTimeFieldSelector.locator('[aria-label="Year"]').textContent();
 
         return year + '-' + month + '-' + day;
     }
 
     public async clickToSelectStartDateAndTime() {
-        await this.startDateAndTimeSelector.locator('button').click();
+        await this.startDateAndTimeFieldSelector.locator('button').click();
     }
 
     public async enterStartDate(day: Date) {
@@ -132,13 +134,11 @@ import {DateAndTimePicker} from "../components/date-and-time-picker";
     }
 
     public async expectStartDateErrorMessageToBe(errorMessage: string) {
-        return expect(this.dateClass.first()).toContainText(errorMessage);
+        return expect(this.startDateAndTimeFieldSelector.locator('~ p')).toContainText(errorMessage);
     }
 
-    endDateAndTimeSelector = this.page.getByTestId('form-end-date');
-
     public async clickToSelectEndDateAndTime() {
-        await this.endDateAndTimeSelector.locator('button').click();
+        await this.endDateAndTimeFieldSelector.locator('button').click();
     }
 
     public async enterEndDate(day: Date) {
@@ -148,20 +148,7 @@ import {DateAndTimePicker} from "../components/date-and-time-picker";
     }
 
     public async expectEndDateErrorMessageToBe(errorMessage: string) {
-        await expect(this.endDateAndTimeSelector.locator('~ div').getByText(errorMessage)).toBeVisible();
-    }
-
-    public async enterReservationDates(startDay: Date, endDay?: Date) {
-        // todo - delete this method
-        await this.enterStartDate(startDay);
-        await this.clickToSelectEndDateAndTime();
-
-        if (endDay) {
-            await this.dateAndTimePicker.selectDay(endDay);
-        } else {
-            await this.dateAndTimePicker.selectDay(startDay);
-            await this.dateAndTimePicker.accept();
-        }
+        await expect(this.endDateAndTimeFieldSelector.locator('~ p')).toContainText(errorMessage);
     }
 
     public async enterStartTime(hour: number) {
@@ -174,12 +161,6 @@ import {DateAndTimePicker} from "../components/date-and-time-picker";
         await this.clickToSelectEndDateAndTime();
         await this.dateAndTimePicker.selectTime(hour);
         await this.dateAndTimePicker.accept();
-    }
-
-    public async enterReservationTime(startHour: number, endHour: number) {
-        // delete this method
-        await this.enterStartTime(startHour);
-        await this.enterEndTime(endHour);
     }
 
     public async enterDatesAndTime(startDay: Date, startHour: number, endHour: number, endDay?: Date) {
@@ -212,7 +193,7 @@ import {DateAndTimePicker} from "../components/date-and-time-picker";
     }
 
     public get agreementCheckbox() {
-        return this.page.locator('.form__input-field').locator('[type="checkbox"]');
+        return this.formInputFieldSelector.locator('[type="checkbox"]');
     }
 
     public async selectAgreementCheckbox() {
@@ -244,12 +225,12 @@ import {DateAndTimePicker} from "../components/date-and-time-picker";
 
     public async getCashReservationPrice() {
 
-        const getPrice = async() => {
-          const text = await this.submitWithCashPaymentButton.textContent();
-          return text.substring(38, 40);
+        const getPrice = async () => {
+            const text = await this.submitWithCashPaymentButton.textContent();
+            return text.substring(38, 40);
         };
 
-        await expect(async() => {
+        await expect(async () => {
             const currentPrice = await getPrice();
             await expect(currentPrice.length).toBeGreaterThan(0);
         }).toPass();
@@ -270,9 +251,14 @@ import {DateAndTimePicker} from "../components/date-and-time-picker";
         await this.selectReservationType(type);
         await this.enterBandName(bandName);
         await this.enterPhoneNumber(phoneNum);
-        await this.enterReservationDates(startDay, endDay);
-        await this.enterReservationTime(startHour, endHour);
+        await this.enterDatesAndTime(startDay, startHour, endHour, endDay);
         await this.selectAgreementCheckbox();
+    }
+
+    public async expectNewUserOnlinePaymentAlertToBe() {
+        const message = 'Dla nowych użytkowników dostępna jest wyłącznie płatność online. Po pierwszej odbytej próbie pojawi się opcja płatności gotówką.';
+
+        await expect(this.formInputFieldSelector.last()).toContainText(message);
     }
 
     public get successfulReservationAlert() {
@@ -303,8 +289,9 @@ import {DateAndTimePicker} from "../components/date-and-time-picker";
 
     public async expectReservationToBeCreated(date: string, startHour: number, bandName: string, successfulAlert = true, adminPanel = false) {
 
-        if(successfulAlert) {
-         await this.closeSuccessfulReservationAlert();
+        if (successfulAlert) {
+            // only appears when paying with cash
+            await this.closeSuccessfulReservationAlert();
         }
         await this.calendar.expectReservationToBeVisible(date, startHour, bandName, adminPanel);
     }
