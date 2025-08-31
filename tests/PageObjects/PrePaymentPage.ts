@@ -20,7 +20,7 @@ export class PrePaymentPagePO {
         return this.page.getByTestId('go-to-payment');
     }
 
-    public async goToPayment() {
+    public async goToPaymentMethod() {
         await this.paymentButton.click();
     }
 }

@@ -7,7 +7,7 @@ test.beforeEach(async ({page}) => {
     pages = initialise(page)
 
     await test.step('Log in to the admin panel', async() => {
-    const adminPassword = '12345';
+    const adminPassword = '123456';
 
      reservation = {
         bandName: 'Timanfaya',

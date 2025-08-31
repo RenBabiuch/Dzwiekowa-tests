@@ -18,7 +18,7 @@ test('Reservation with correct data is visible in the admin panel and can be can
     } as const;
 
     const endHour = reservation.startHour + 2;
-    const adminPassword = '12345';
+    const adminPassword = '123456';
     const fakePhoneNum = '777222333';
     let reservationDate;
     let currentPrice;

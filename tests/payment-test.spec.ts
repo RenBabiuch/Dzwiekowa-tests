@@ -42,7 +42,7 @@ test('Successful online payment', async() => {
     await test.step('Enter email address and go to transfer payment - the amount should be the same as at the beginning', async() => {
         await expect(pages.prePaymentPage.emailVerificationContainer).toBeVisible();
         await pages.prePaymentPage.enterEmailAddress(email);
-        await pages.prePaymentPage.goToPayment();
+        await pages.prePaymentPage.goToPaymentMethod();
         await expect(pages.paymentMethodMenu.paymentContainer).toBeVisible();
         await pages.paymentMethodMenu.goToTransferPayment();
         await pages.transferPage.paymentMethodMenu.expectTransactionAmountToBe(currentReservationPrice);

@@ -67,7 +67,7 @@ test.describe('Reservation tests', async () => {
             await pages.phoneConfirmationPage.enterUserReservationCode();
             await pages.phoneConfirmationPage.confirmReservation();
             await pages.prePaymentPage.enterEmailAddress(reservation.email);
-            await pages.prePaymentPage.goToPayment();
+            await pages.prePaymentPage.goToPaymentMethod();
         });
 
         await test.step('After making the transfer, the reservation should be visible in the calendar', async() => {
@@ -176,7 +176,7 @@ test('Unsuccessful creating a reservation for an already booked date', async () 
         await pages.phoneConfirmationPage.enterUserReservationCode();
         await pages.phoneConfirmationPage.confirmReservation();
         await pages.prePaymentPage.enterEmailAddress(reservation.email);
-        await pages.prePaymentPage.goToPayment();
+        await pages.prePaymentPage.goToPaymentMethod();
         await pages.paymentMethodMenu.goToTransferPayment();
         await pages.transferPage.selectIngBankTransfer();
         await pages.bankPage.goToPay();
