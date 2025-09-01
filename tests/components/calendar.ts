@@ -16,6 +16,10 @@ export class Calendar {
     constructor(private page: Page) {
     }
 
+    public get dateInHeader() {
+        return this.page.locator('.fc-row.fc-widget-header');
+    }
+
     public get weekDateRangeElement() {
         return this.page.locator('.fc-toolbar.fc-header-toolbar');
     }
@@ -23,7 +27,7 @@ export class Calendar {
     // WIP
     public async selectDate(weekDay: weekDayType, hour: string) {
 
-        await this.page.locator('.fc-row.fc-widget-header').locator('>=data-date').nth(mapWeekDayToNumb[weekDay]);
+        await this.dateInHeader.locator('>=data-date').nth(mapWeekDayToNumb[weekDay]);
         await this.page.locator(`.fc-widget-content [data-test="reservation-entry-${mapWeekDayToNumb[weekDay] + 1}-${hour}"]`).click();
     }
 
@@ -93,7 +97,13 @@ export class Calendar {
     }
 
     public async getReservationElement(date: string, startHour: number) {
+        await expect(this.dateInHeader).toBeVisible();
         const dateInRowSelector = this.page.locator(`.fc-row.fc-widget-header [data-date="${date}"]`);
+
+        if(!await dateInRowSelector.isVisible()) {
+            await this.goToNextWeek();
+        }
+
         await expect(dateInRowSelector).toBeVisible();
 
         const dayWeekName = await dateInRowSelector.innerText();
@@ -109,7 +119,7 @@ export class Calendar {
             'ndz': '7'
         }
 
-        return this.page.getByTestId(`reservation-entry-${polWeekDaysToNumbMap[dayWeekNameSubstring]}-${String(startHour)}`);
+        return this.page.getByTestId(`reservation-entry-${polWeekDaysToNumbMap[dayWeekNameSubstring]}-${String(startHour)}`).first();
     }
 
     public async getPreviewOfReservationElement(date: string, startHour: number, bandName: string) {

@@ -5,7 +5,7 @@ export class AdminReservationDetailsPagePO {
     }
 
     public get reservationDetailsContainer() {
-        return this.page.locator('h3').getByText('Anulować rezerwację?');
+        return this.page.locator('h2').getByText('Anulować rezerwację?');
     }
 
     public async expectBandNameToBe(bandName: string) {
@@ -25,7 +25,7 @@ export class AdminReservationDetailsPagePO {
     }
 
     public get closeWindowButton() {
-        return this.page.getByText('Zamknij okno');
+        return this.page.getByLabel('close');
     }
 
     public async closeReservationDetails() {
