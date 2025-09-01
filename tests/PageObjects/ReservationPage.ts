@@ -111,7 +111,7 @@ export class ReservationPagePO {
         const max = 9999999;
 
         const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
-        return randomBeginningValue + String(randomNum).substring(0,1) + ' ' + String(randomNum).substring(1,4) + ' ' + String(randomNum).substring(4,7);
+        return randomBeginningValue + String(randomNum);
     }
 
     public async getStartDateValue() {
