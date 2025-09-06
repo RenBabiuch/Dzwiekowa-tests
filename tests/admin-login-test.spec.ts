@@ -5,11 +5,11 @@ let pages: ReturnType<typeof initialise>;
 test.beforeEach(async({page}) => {
    pages = initialise(page);
 
-   await page.goto('/#admin');
+   await page.goto('#admin');
 });
 
 test('Successful log in with correct data', async() => {
-   const password = '123456';
+   const password = '12345';
 
    await test.step('After logging in, admin panel with correct data should appear', async() => {
       await pages.adminLoginPage.loginTheUser(password);

@@ -12,7 +12,7 @@ test.beforeEach(async ({page}) => {
         startHour: await pages.reservationPage.generateRandomHour(),
     } as const;
 
-    await page.goto('/');
+    await page.goto('');
 });
 
 const roomsName = {
@@ -55,7 +55,7 @@ test.describe('Reservation tests', async () => {
             await pages.reservationPage.expectNewUserOnlinePaymentAlertToBe();
         });
 
-        const reservationDate = await pages.reservationPage.getStartDateValue();
+        const reservationDate = await pages.reservationPage.getStartDateInputValue();
 
         await test.step('Select the checkbox and send the form', async () => {
             await pages.reservationPage.selectAgreementCheckbox();
@@ -65,7 +65,7 @@ test.describe('Reservation tests', async () => {
         await test.step('Enter correct data and proceed to payment', async () => {
             await pages.phoneConfirmationPage.expectEnteredNumberToBeVisible(generated.phoneNum);
             await pages.phoneConfirmationPage.enterUserReservationCode();
-            await pages.phoneConfirmationPage.confirmReservation();
+            await pages.phoneConfirmationPage.confirmAndGoToPrePayment();
             await pages.prePaymentPage.enterEmailAddress(reservation.email);
             await pages.prePaymentPage.goToPaymentMethod();
         });
@@ -171,10 +171,10 @@ test('Unsuccessful creating a reservation for an already booked date', async () 
         await pages.reservationPage.fillTheReservationForm(roomsName.num2, reservationType.band, reservation.bandName1, generated.phoneNum, generated.startHour, reservation.endHour, reservation.date);
         await pages.reservationPage.submitWithOnlinePayment();
 
-        reservationDate = await pages.reservationPage.getStartDateValue();
+        reservationDate = await pages.reservationPage.getStartDateInputValue();
 
         await pages.phoneConfirmationPage.enterUserReservationCode();
-        await pages.phoneConfirmationPage.confirmReservation();
+        await pages.phoneConfirmationPage.confirmAndGoToPrePayment();
         await pages.prePaymentPage.enterEmailAddress(reservation.email);
         await pages.prePaymentPage.goToPaymentMethod();
         await pages.paymentMethodMenu.goToTransferPayment();
@@ -266,7 +266,6 @@ test('Unsuccessful reservation when band name is not entered', async () => {
 });
 
 test('Unsuccessful reservation when no phone number is entered', async () => {
-
     const reservation = {
         bandName: 'Wiewióry',
         date: await pages.reservationPage.getSpecificDate('tomorrow'),

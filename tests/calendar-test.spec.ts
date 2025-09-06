@@ -6,7 +6,7 @@ let pages: ReturnType<typeof initialise>;
 test.beforeEach(async ({page}) => {
     pages = initialise(page);
 
-    await page.goto('/');
+    await page.goto('');
 });
 
 test('The calendar shows the correct dates', async () => {

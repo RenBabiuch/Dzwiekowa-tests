@@ -5,10 +5,10 @@ let pages: ReturnType<typeof initialise>;
 test.beforeEach(async ({page}) => {
     pages = initialise(page)
 
-    await page.goto('/');
+    await page.goto('');
 });
 
-test('Reservation with correct data is visible in the admin panel and can be canceled', async ({page}) => {
+test('Reservation with correct data is visible in the admin panel and can be canceled with refund', async ({page}) => {
     const reservation = {
         bandName: 'Harry Potty',
         phone: await pages.reservationPage.generateRandomPhoneNumber(),
@@ -19,7 +19,7 @@ test('Reservation with correct data is visible in the admin panel and can be can
     } as const;
 
     const endHour = reservation.startHour + 2;
-    const adminPassword = '123456';
+    const adminPassword = '12345';
     const fakePhoneNum = '777222333';
     let reservationDate;
     let currentPrice;
@@ -27,12 +27,12 @@ test('Reservation with correct data is visible in the admin panel and can be can
        await test.step('Create a valid reservation in user`s view - it should be visible in calendar', async() => {
         await pages.reservationPage.fillTheReservationForm('Browar Miesczanski', 'Zespół', reservation.bandName, reservation.phone, reservation.startHour, endHour, reservation.date);
 
-        reservationDate = await pages.reservationPage.getStartDateValue();
+        reservationDate = await pages.reservationPage.getStartDateInputValue();
         currentPrice = await pages.reservationPage.getOnlineReservationPrice();
 
         await pages.reservationPage.submitWithOnlinePayment();
         await pages.phoneConfirmationPage.enterUserReservationCode();
-        await pages.phoneConfirmationPage.confirmReservation();
+        await pages.phoneConfirmationPage.confirmAndGoToPrePayment();
         await pages.prePaymentPage.enterEmailAddress(reservation.email);
         await pages.prePaymentPage.goToPaymentMethod();
         await pages.paymentMethodMenu.goToTransferPayment();
@@ -42,7 +42,7 @@ test('Reservation with correct data is visible in the admin panel and can be can
     });
 
     await test.step('After login to admin panel, reservation should be visible as well', async() => {
-        await page.goto('/#admin');
+        await page.goto('#admin');
         await page.reload();
         await pages.adminLoginPage.loginTheUser(adminPassword);
         await expect(pages.adminReservationPage.calendarElement).toBeVisible();
@@ -74,7 +74,7 @@ test('Reservation with correct data is visible in the admin panel and can be can
 
     await test.step('When reservation is canceled, its preview should disappear - except canceled reservations view', async() => {
         await pages.adminReservationPage.calendar.clickToSeeReservationDetails(reservationDate, reservation.startHour, reservation.bandName);
-        await pages.adminReservationDetailsPage.cancelReservation();
+        await pages.adminReservationDetailsPage.cancelReservationWithRefund();
         await page.reload();
         await expect(await pages.adminReservationPage.calendar.getAdminReservationElement(reservationDate, reservation.startHour, reservation.bandName)).not.toBeVisible();
         await pages.adminReservationPage.selectReservationScope('Anulowane');
