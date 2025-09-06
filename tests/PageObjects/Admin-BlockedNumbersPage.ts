@@ -10,7 +10,7 @@ export class AdminBlockedNumbersPagePO {
     adminHeader = new AdminHeader(this.page);
 
     public get blockNumberInput() {
-        return this.page.getByTestId('block-new-number').locator('input');
+        return this.page.getByTestId('block-new-number').last().locator('input');
     }
 
     public async enterNumberToBlock(phoneNumber: string) {
@@ -36,10 +36,11 @@ export class AdminBlockedNumbersPagePO {
         await this.blockNumberReasonInput.fill(reason);
     }
 
-    public async fillTheBlockNumberForm(phoneNumber: string, blockName: blockType, reason: string) {
+    public async fillAndConfirmBlockNumberForm(phoneNumber: string, blockName: blockType, reason: string) {
         await this.enterNumberToBlock(phoneNumber);
         await this.selectBlockType(blockName);
         await this.enterBlockNumberReason(reason);
+        await this.confirmNumberBlocking();
     }
 
     public get saveButton() {
@@ -51,7 +52,7 @@ export class AdminBlockedNumbersPagePO {
     }
 
     public get blockedNumbersContainer() {
-        return this.page.locator('.block-numbers__container').getByText('Obecnie zablokowane numery');
+        return this.page.getByText('Obecnie zablokowane numery');
     }
 
     public async blockedNumberElement(phoneNumber: string) {

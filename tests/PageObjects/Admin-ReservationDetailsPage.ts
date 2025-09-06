@@ -32,15 +32,25 @@ export class AdminReservationDetailsPagePO {
         await this.closeWindowButton.click();
     }
 
-    public get cancelReservationButton() {
-        return this.page.getByText('Anuluj rezerwację');
+    public get cancelReservationWithRefundButton() {
+        return this.page.getByRole('button', {name: 'Anuluj ze zwrotem zapłaty'});
     }
 
-    public async cancelReservation() {
+    public async cancelReservationWithRefund() {
         this.page.once('dialog', dialog => {
-            console.log(`Dialog message: ${dialog.message()}`);
             dialog.accept().catch(() => {});
         });
-        await this.cancelReservationButton.click();
+        await this.cancelReservationWithRefundButton.click();
+    }
+
+    public get cancelReservationWithoutRefundButton() {
+        return this.page.getByRole('button', {name: 'Anuluj bez zwrotu zapłaty'});
+    }
+
+    public async cancelReservationWithoutRefund() {
+        this.page.once('dialog', dialog => {
+            dialog.accept().catch(() => {});
+        });
+        await this.cancelReservationWithoutRefundButton.click();
     }
 }

@@ -114,7 +114,7 @@ export class ReservationPagePO {
         return randomBeginningValue + String(randomNum).substring(0,1) + ' ' + String(randomNum).substring(1,4) + ' ' + String(randomNum).substring(4,7);
     }
 
-    public async getStartDateValue() {
+    public async getStartDateInputValue() {
 
         const day = await this.startDateAndTimeFieldSelector.locator('[aria-label="Day"]').textContent();
         const month = await this.startDateAndTimeFieldSelector.locator('[aria-label="Month"]').textContent();
@@ -287,12 +287,12 @@ export class ReservationPagePO {
         return Math.floor(Math.random() * 22);
     }
 
-    public async expectReservationToBeCreated(date: string, startHour: number, bandName: string, successfulAlert = true, adminPanel = false) {
+    public async expectReservationToBeCreated(inputDate: string, startHour: number, bandName: string, successfulAlert = true, adminPanel = false) {
 
         if (successfulAlert) {
             // only appears when paying with cash
             await this.closeSuccessfulReservationAlert();
         }
-        await this.calendar.expectReservationToBeVisible(date, startHour, bandName, adminPanel);
+        await this.calendar.expectReservationToBeVisible(inputDate, startHour, bandName, adminPanel);
     }
 }

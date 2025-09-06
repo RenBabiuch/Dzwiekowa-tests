@@ -25,7 +25,7 @@ export class PhoneConfirmationPagePO {
         return this.page.getByTestId('form-verify-submit');
     }
 
-    public async confirmReservation() {
+    public async confirmAndGoToPrePayment() {
         await this.sendButton.click();
     }
 }
