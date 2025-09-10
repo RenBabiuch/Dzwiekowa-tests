@@ -100,7 +100,7 @@ export class Calendar {
         await expect(this.dateInHeader).toBeVisible();
         const dateInRowSelector = this.page.locator(`.fc-row.fc-widget-header [data-date="${date}"]`);
 
-        if(!await dateInRowSelector.isVisible()) {
+        if (!await dateInRowSelector.isVisible()) {
             await this.goToNextWeek();
         }
 
