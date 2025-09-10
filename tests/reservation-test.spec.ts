@@ -97,7 +97,7 @@ test('Unsuccessful reservation of the date from the past', async () => {
     });
 
     await test.step('After selecting date from the past, the error message should be visible', async () => {
-        await pages.reservationPage.enterDatesAndTime(reservation.date, generated.startHour, reservation.endHour)
+        await pages.reservationPage.enterDatesAndTime(reservation.date, generated.startHour, reservation.endHour);
         await pages.reservationPage.selectAgreementCheckbox();
         await pages.reservationPage.submitWithOnlinePayment();
         await pages.reservationPage.expectStartDateErrorMessageToBe(lateReservationErrorMessage);
