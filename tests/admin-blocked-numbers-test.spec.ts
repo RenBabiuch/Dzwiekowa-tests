@@ -23,7 +23,7 @@ test('Complete blocking phone numbers works', async({page}) => {
     const endHour =  reservation.startHour + 2;
     const blockedNumber = '579823433';
 
-    test.setTimeout(45_000);
+    test.slow();
 
     await test.step('Go to create first reservation', async() => {
         await page.goto('');

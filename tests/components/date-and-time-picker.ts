@@ -7,8 +7,7 @@ export class DateAndTimePicker {
     public async selectDay(day: Date) {
 
         const monthAndYearInCalendar = await this.page.locator('.MuiPickersCalendarHeader-label').first().textContent();
-        const monthInCalendarSubstring = monthAndYearInCalendar.split('').reverse().join('').substring(5);
-        const monthInCalendar = monthInCalendarSubstring.split('').reverse().join('');
+        const monthInCalendar = monthAndYearInCalendar.slice(0, -5);
 
         const numbToMonthsMap = {
             0: 'styczeń',
