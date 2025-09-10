@@ -30,11 +30,11 @@ export class DateAndTimePicker {
 
         if(monthInCalendar === numbToMonthsMap[targetMonth]) {
             await expect(this.page.getByText(numbToMonthsMap[targetMonth])).toBeVisible();
-            await this.page.getByRole('gridcell', {name: `${targetDay}`, exact: true}).nth(0).click();
+            await this.page.getByRole('gridcell', {name: `${targetDay}`, exact: true}).click();
         } else {
             await this.page.keyboard.press('ArrowRight');
             await expect(this.page.getByText(numbToMonthsMap[targetMonth])).toBeVisible();
-            await this.page.getByRole('gridcell', {name: `${targetDay}`, exact: true}).nth(0).click();
+            await this.page.getByRole('gridcell', {name: `${targetDay}`, exact: true}).click();
         }
     }
 
