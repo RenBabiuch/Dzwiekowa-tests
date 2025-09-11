@@ -148,4 +148,8 @@ export class Calendar {
         const previewOfReservationElem = await this.getPreviewOfReservationElement(date, startHour, bandName);
         await previewOfReservationElem.click();
     }
+
+    public async expectReservationToBeMarkedAsFirst(date: string, startHour: number, bandName: string) {
+        await expect(await this.getPreviewOfReservationElement(date, startHour, bandName)).toContainText('★');
+    }
 }
