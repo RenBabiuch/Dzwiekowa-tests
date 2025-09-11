@@ -5,7 +5,7 @@ let pages: ReturnType<typeof initialise>;
 test.beforeEach(async({page}) => {
    pages = initialise(page);
 
-   await page.goto('/#admin');
+   await page.goto('#admin');
 });
 
 test('Successful log in with correct data', async() => {
@@ -16,7 +16,7 @@ test('Successful log in with correct data', async() => {
       await expect(pages.adminReservationPage.adminHeader.loggedToAdminPanelInfo).toBeVisible();
       await expect(pages.adminReservationPage.calendarElement).toBeVisible();
       await pages.adminReservationPage.adminHeader.goToManageRooms();
-      await expect(pages.adminManageRoomsPage.getRoomContainer('Browar Miesczanski')).toBeVisible();
+      await expect(pages.adminManageRoomsPage.getRoomContainer('Browar')).toBeVisible();
       await expect(pages.adminManageRoomsPage.getRoomContainer('Stary Młyn')).toBeVisible();
    });
 });
@@ -28,7 +28,7 @@ test('Unsuccessful log in with incorrect data ', async() => {
       await pages.adminLoginPage.loginTheUser(password);
       await expect(pages.adminReservationPage.adminHeader.loggedToAdminPanelInfo).toBeVisible();
       await pages.adminReservationPage.adminHeader.goToManageRooms();
-      await expect(pages.adminManageRoomsPage.getRoomContainer('Browar Miesczanski')).not.toBeVisible();
+      await expect(pages.adminManageRoomsPage.getRoomContainer('Browar')).not.toBeVisible();
       await expect(pages.adminManageRoomsPage.getRoomContainer('Stary Młyn')).not.toBeVisible();
    });
 });

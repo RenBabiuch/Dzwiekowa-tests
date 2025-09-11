@@ -5,11 +5,11 @@ export class PrePaymentPagePO {
     }
 
     public get emailVerificationContainer() {
-        return this.page.locator('.verification-container').first();
+        return this.page.locator('.reservation__form');
     }
 
     public get emailAddressInput() {
-        return this.page.getByTestId('form-payment-email');
+        return this.page.locator('[name="email"] input');
     }
 
     public async enterEmailAddress(email: string) {
@@ -20,7 +20,7 @@ export class PrePaymentPagePO {
         return this.page.getByTestId('go-to-payment');
     }
 
-    public async goToPayment() {
+    public async goToPaymentMethod() {
         await this.paymentButton.click();
     }
 }

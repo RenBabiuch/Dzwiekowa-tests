@@ -1,26 +1,31 @@
 import {expect, Page} from "@playwright/test";
 import {Calendar} from "../components/calendar";
-import {DatePicker} from "../components/date-picker";
-import {TimePicker} from "../components/time-picker";
+import {DateAndTimePicker} from "../components/date-and-time-picker";
 
-    type roomNameType = 'Wszystkie' | 'Browar Miesczanski' | 'Stary Mlyn';
-    type reservationTypeNameType = 'Wybierz...' | 'Zespol' | 'Solo' | 'Nagrywka';
-    type dayNameType = 'yesterday' | 'today' | 'tomorrow' | 'day after tomorrow';
+type roomNameType = 'Wszystkie' | 'Browar Miesczanski' | 'Stary Mlyn';
+type reservationTypeNameType = 'Wybierz...' | 'Zespół' | 'Solo' | 'Nagrywka';
+type dayNameType = 'yesterday' | 'today' | 'tomorrow' | 'day after tomorrow';
 
-    export class ReservationPagePO {
+export class ReservationPagePO {
     constructor(private page: Page) {
     }
 
     calendar = new Calendar(this.page);
-    datePicker = new DatePicker(this.page);
-    timePicker = new TimePicker(this.page);
+    dateAndTimePicker = new DateAndTimePicker(this.page);
+
+    reservationTypeIdSelector = 'form-reservation-type';
+    formInputFieldSelector = this.page.locator('.form__input-field');
+    bandNameFieldSelector = this.page.getByTestId('form-band-name');
+    phoneNumberFieldSelector = this.page.getByTestId('form-phone-number');
+    startDateAndTimeFieldSelector = this.page.getByTestId('form-start-date');
+    endDateAndTimeFieldSelector = this.page.getByTestId('form-end-date');
 
     public get reservationFormElement() {
-        return this.page.locator('.reservation-form-container');
+        return this.page.locator('.reservation__form');
     }
 
     public get rehearsalRoomElement() {
-        return this.page.getByTestId('form-room');
+        return this.page.getByTestId('form-room').first();
     }
 
     public async selectRehearsalRoom(roomName: roomNameType) {
@@ -30,11 +35,11 @@ import {TimePicker} from "../components/time-picker";
             'Stary Mlyn': '2'
         }
 
-        await this.rehearsalRoomElement.locator('button').click();
-        await expect(this.page.getByRole('menu')).toBeVisible();
+        await this.rehearsalRoomElement.click();
+        await expect(this.page.getByRole('listbox')).toBeVisible();
 
         if (roomName === 'Wszystkie') {
-            await this.page.getByRole('menuitem', {name: 'Wszystkie'}).click();
+            await this.page.getByRole('option').getByText('Wszystkie', {exact: true}).click();
         } else {
             await this.page.getByTestId(`form-room-${roomNameToNumberMap[roomName]}`).click();
         }
@@ -45,35 +50,34 @@ import {TimePicker} from "../components/time-picker";
     }
 
     public get reservationTypeButton() {
-        return this.page.locator('[id^="undefined-undefined-Typrezerwacji-"] button');
+        return this.page.getByTestId(this.reservationTypeIdSelector).getByRole('combobox');
     }
 
     public async selectReservationType(typeName: reservationTypeNameType) {
 
         const typeNameToNumberMap = {
-            'Zespol': '0',
             'Solo': '1',
-            'Nagrywka': '2'
+            'Nagrywka': '2',
+            'Solo z talerzami': '3',
+            'Zespół': '4',
         }
 
         await this.reservationTypeButton.click();
-        await expect(this.page.getByRole('menu')).toBeVisible();
+        await expect(this.page.getByRole('listbox')).toBeVisible();
 
         if (typeName === 'Wybierz...') {
-            await this.page.getByRole('menuitem', {name: 'Wybierz...'}).click();
+            await this.page.getByRole('option').getByText('Wybierz...').click();
         } else {
             await this.page.getByTestId(this.reservationTypeIdSelector + `-${typeNameToNumberMap[typeName]}`).click();
         }
     }
 
-    reservationTypeIdSelector = 'form-reservation-type';
-
     public async expectReservationTypeErrorMessageToBe(errorMessage: string) {
-        await expect(this.page.getByTestId(this.reservationTypeIdSelector)).toContainText(errorMessage);
+        await expect(this.page.getByTestId(this.reservationTypeIdSelector).first()).toContainText(errorMessage);
     }
 
     public get bandNameInput() {
-        return this.page.getByTestId('form-band-name');
+        return this.bandNameFieldSelector.locator('input');
     }
 
     public async enterBandName(name: string) {
@@ -81,11 +85,11 @@ import {TimePicker} from "../components/time-picker";
     }
 
     public async expectBandNameErrorMessageToBe(errorMessage: string) {
-        await expect(this.bandNameInput.locator('~ div').getByText(errorMessage)).toBeVisible();
+        await expect(this.bandNameFieldSelector.first()).toContainText(errorMessage);
     }
 
     public get phoneNumberInput() {
-        return this.page.getByTestId('form-phone-number');
+        return this.phoneNumberFieldSelector.locator('input');
     }
 
     public async enterPhoneNumber(number: string) {
@@ -94,7 +98,7 @@ import {TimePicker} from "../components/time-picker";
     }
 
     public async expectPhoneNumErrorMessageToBe(errorMessage: string) {
-        await expect(this.phoneNumberInput.locator('~ div').getByText(errorMessage)).toBeVisible();
+        await expect(this.phoneNumberFieldSelector.first()).toContainText(errorMessage);
     }
 
     public async generateRandomPhoneNumber() {
@@ -107,92 +111,90 @@ import {TimePicker} from "../components/time-picker";
         const max = 9999999;
 
         const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
-        return randomBeginningValue + String(randomNum);
+        const randomNumStr = String(randomNum).padStart(7,"0");
+        return randomBeginningValue + randomNumStr.substring(0,1) + ' ' + randomNumStr.substring(1,4) + ' ' + randomNumStr.substring(4,7);
     }
 
-    dateClass = this.page.locator('.form__input-date');
+    public async getStartDateInputValue() {
 
-    public get startDateInput() {
-        return this.page.getByTestId('form-start-date');
+        const day = await this.startDateAndTimeFieldSelector.locator('[aria-label="Day"]').textContent();
+        const month = await this.startDateAndTimeFieldSelector.locator('[aria-label="Month"]').textContent();
+        const year = await this.startDateAndTimeFieldSelector.locator('[aria-label="Year"]').textContent();
+
+        return year + '-' + month + '-' + day;
     }
 
-    public get startDateInputValue() {
-        return this.startDateInput.getAttribute('value');
+    public async clickToSelectStartDateAndTime() {
+        await this.startDateAndTimeFieldSelector.locator('button').click();
     }
 
     public async enterStartDate(day: Date) {
-        await this.startDateInput.click();
-        await this.datePicker.selectDay(day);
+        await this.clickToSelectStartDateAndTime();
+        await this.dateAndTimePicker.selectDay(day);
+        await this.dateAndTimePicker.accept();
     }
 
     public async expectStartDateErrorMessageToBe(errorMessage: string) {
-        return expect(this.dateClass.first()).toContainText(errorMessage);
+        return expect(this.startDateAndTimeFieldSelector.locator('~ p')).toContainText(errorMessage);
     }
 
-    public get endDateInput() {
-        return this.page.getByTestId('form-end-date');
+    public async clickToSelectEndDateAndTime() {
+        await this.endDateAndTimeFieldSelector.locator('button').click();
     }
 
     public async enterEndDate(day: Date) {
-        await this.endDateInput.click();
-        await this.datePicker.selectDay(day);
+        await this.clickToSelectEndDateAndTime();
+        await this.dateAndTimePicker.selectDay(day);
+        await this.dateAndTimePicker.accept();
     }
 
     public async expectEndDateErrorMessageToBe(errorMessage: string) {
-        await expect(this.endDateInput.locator('~ div').getByText(errorMessage)).toBeVisible();
+        await expect(this.endDateAndTimeFieldSelector.locator('~ p')).toContainText(errorMessage);
     }
 
-    public async enterReservationDate(startDay: Date, endDay?: Date) {
-        await this.enterStartDate(startDay);
-        await this.endDateInput.click();
+    public async enterStartTime(hour: number) {
+        await this.clickToSelectStartDateAndTime();
+        await this.dateAndTimePicker.selectTime(hour);
+        await this.dateAndTimePicker.accept();
+    }
+
+    public async enterEndTime(hour: number) {
+        await this.clickToSelectEndDateAndTime();
+        await this.dateAndTimePicker.selectTime(hour);
+        await this.dateAndTimePicker.accept();
+    }
+
+    public async enterDatesAndTime(startDay: Date, startHour: number, endHour: number, endDay?: Date) {
+        await this.clickToSelectStartDateAndTime();
+        await this.dateAndTimePicker.selectAndApproveDayAndTime(startDay, startHour);
+        await this.clickToSelectEndDateAndTime();
 
         if (endDay) {
-            await this.datePicker.selectDay(endDay);
+            await this.dateAndTimePicker.selectAndApproveDayAndTime(endDay, endHour);
         } else {
-            await this.datePicker.selectDay(startDay);
+            await this.dateAndTimePicker.selectAndApproveDayAndTime(startDay, endHour);
         }
-    }
-
-    public get startTimeInput() {
-        return this.page.getByTestId('form-start-time');
-    }
-
-    public async selectStartTime(hour: number) {
-        await this.startTimeInput.click();
-        await this.timePicker.selectTime(hour);
-    }
-
-    public get endTimeInput() {
-        return this.page.getByTestId('form-end-time');
-    }
-
-    public async selectEndTime(hour: number) {
-        await this.endTimeInput.click();
-        await this.timePicker.selectTime(hour);
-    }
-
-    public async selectReservationTime(startHour: number, endHour: number) {
-        await this.selectStartTime(startHour);
-        await this.selectEndTime(endHour);
     }
 
     public async expectSelectedTimeToBe(startHour: number, endHour: number) {
 
+        const reservationHourSelector = this.page.locator('.MuiPickersSectionList-section').locator('[aria-label="Hours"]');
+
         if (String(startHour).length === 1) {
-            await expect(this.startTimeInput).toHaveValue(`0${String(startHour)}:00`);
+            await expect(reservationHourSelector.first()).toHaveText(`0${String(startHour)}`)
         } else {
-            await expect(this.startTimeInput).toHaveValue(`${String(startHour)}:00`);
+            await expect(reservationHourSelector.first()).toHaveText(String(startHour));
         }
 
         if (String(endHour).length === 1) {
-            await expect(this.endTimeInput).toHaveValue(`0${String(endHour)}:00`);
+            await expect(reservationHourSelector.last()).toHaveText(`0${String(endHour)}`)
         } else {
-            await expect(this.endTimeInput).toHaveValue(`${String(endHour)}:00`);
+            await expect(reservationHourSelector.last()).toHaveText(String(endHour));
         }
     }
 
     public get agreementCheckbox() {
-        return this.page.getByTestId('accept-rules-checkbox');
+        return this.formInputFieldSelector.locator('[type="checkbox"]');
     }
 
     public async selectAgreementCheckbox() {
@@ -224,12 +226,12 @@ import {TimePicker} from "../components/time-picker";
 
     public async getCashReservationPrice() {
 
-        const getPrice = async() => {
-          const text = await this.submitWithCashPaymentButton.textContent();
-          return text.substring(38, 40);
+        const getPrice = async () => {
+            const text = await this.submitWithCashPaymentButton.textContent();
+            return text.substring(38, 40);
         };
 
-        await expect(async() => {
+        await expect(async () => {
             const currentPrice = await getPrice();
             await expect(currentPrice.length).toBeGreaterThan(0);
         }).toPass();
@@ -250,9 +252,14 @@ import {TimePicker} from "../components/time-picker";
         await this.selectReservationType(type);
         await this.enterBandName(bandName);
         await this.enterPhoneNumber(phoneNum);
-        await this.enterReservationDate(startDay, endDay);
-        await this.selectReservationTime(startHour, endHour);
+        await this.enterDatesAndTime(startDay, startHour, endHour, endDay);
         await this.selectAgreementCheckbox();
+    }
+
+    public async expectNewUserOnlinePaymentAlertToBe() {
+        const message = 'Dla nowych użytkowników dostępna jest wyłącznie płatność online. Po pierwszej odbytej próbie pojawi się opcja płatności gotówką.';
+
+        await expect(this.formInputFieldSelector.last()).toContainText(message);
     }
 
     public get successfulReservationAlert() {
@@ -281,11 +288,12 @@ import {TimePicker} from "../components/time-picker";
         return Math.floor(Math.random() * 22);
     }
 
-    public async expectReservationToBeCreated(date: string, startHour: number, bandName: string, successfulAlert = true, adminPanel = false) {
+    public async expectReservationToBeCreated(inputDate: string, startHour: number, bandName: string, successfulAlert = true, adminPanel = false) {
 
-        if(successfulAlert) {
-         await this.closeSuccessfulReservationAlert();
+        if (successfulAlert) {
+            // only appears when paying with cash
+            await this.closeSuccessfulReservationAlert();
         }
-        await this.calendar.expectReservationToBeVisible(date, startHour, bandName, adminPanel);
+        await this.calendar.expectReservationToBeVisible(inputDate, startHour, bandName, adminPanel);
     }
 }

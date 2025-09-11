@@ -1,7 +1,7 @@
 import {Page} from "@playwright/test";
 import {AdminHeader} from "../components/admin-header";
 
-type roomNameType = 'Browar Miesczanski' | 'Stary Młyn';
+type roomNameType = 'Browar' | 'Stary Młyn';
 
 export class AdminManageRoomsPagePO {
     constructor(private page: Page) {

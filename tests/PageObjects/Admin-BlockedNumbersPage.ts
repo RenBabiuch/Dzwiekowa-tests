@@ -1,6 +1,8 @@
 import {Page} from "@playwright/test";
 import {AdminHeader} from "../components/admin-header";
 
+type blockType = 'blocked' | 'enforce-online-payment';
+
 export class AdminBlockedNumbersPagePO {
     constructor(private page: Page) {
     }
@@ -8,30 +10,37 @@ export class AdminBlockedNumbersPagePO {
     adminHeader = new AdminHeader(this.page);
 
     public get blockNumberInput() {
-        return this.page.getByTestId('block-new-number');
+        return this.page.getByTestId('block-new-number').last().locator('input');
     }
 
     public async enterNumberToBlock(phoneNumber: string) {
         await this.blockNumberInput.fill(phoneNumber);
     }
 
-    public async selectBlockType(blockType: 'blocked' | 'enforce-online-payment') {
+    public async selectBlockType(blockName: blockType) {
 
         const engToPolishNameMap = {
             'blocked': 'Zablokowany',
             'enforce-online-payment': 'Wymuś płatność online'
         }
 
-        await this.page.getByTestId('block-new-type').click();
-        await this.page.getByRole('menuitem').getByText(engToPolishNameMap[blockType]).click();
+        await this.page.getByTestId('block-new-type').first().click();
+        await this.page.getByRole('listbox').getByText(engToPolishNameMap[blockName]).click();
     }
 
     public get blockNumberReasonInput() {
-        return this.page.getByTestId('block-new-reason');
+        return this.page.getByTestId('block-new-reason').locator('input');
     }
 
     public async enterBlockNumberReason(reason: string) {
         await this.blockNumberReasonInput.fill(reason);
+    }
+
+    public async fillAndConfirmBlockNumberForm(phoneNumber: string, blockName: blockType, reason: string) {
+        await this.enterNumberToBlock(phoneNumber);
+        await this.selectBlockType(blockName);
+        await this.enterBlockNumberReason(reason);
+        await this.confirmNumberBlocking();
     }
 
     public get saveButton() {
@@ -43,7 +52,7 @@ export class AdminBlockedNumbersPagePO {
     }
 
     public get blockedNumbersContainer() {
-        return this.page.locator('.block-numbers__container').getByText('Obecnie zablokowane numery');
+        return this.page.getByText('Obecnie zablokowane numery');
     }
 
     public async blockedNumberElement(phoneNumber: string) {

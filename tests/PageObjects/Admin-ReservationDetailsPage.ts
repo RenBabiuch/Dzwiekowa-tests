@@ -5,7 +5,7 @@ export class AdminReservationDetailsPagePO {
     }
 
     public get reservationDetailsContainer() {
-        return this.page.locator('h3').getByText('Anulować rezerwację?');
+        return this.page.locator('h2').getByText('Anulować rezerwację?');
     }
 
     public async expectBandNameToBe(bandName: string) {
@@ -25,22 +25,32 @@ export class AdminReservationDetailsPagePO {
     }
 
     public get closeWindowButton() {
-        return this.page.getByText('Zamknij okno');
+        return this.page.getByLabel('close');
     }
 
     public async closeReservationDetails() {
         await this.closeWindowButton.click();
     }
 
-    public get cancelReservationButton() {
-        return this.page.getByText('Anuluj rezerwację');
+    public get cancelReservationWithRefundButton() {
+        return this.page.getByRole('button', {name: 'Anuluj ze zwrotem zapłaty'});
     }
 
-    public async cancelReservation() {
+    public async cancelReservationWithRefund() {
         this.page.once('dialog', dialog => {
-            console.log(`Dialog message: ${dialog.message()}`);
             dialog.accept().catch(() => {});
         });
-        await this.cancelReservationButton.click();
+        await this.cancelReservationWithRefundButton.click();
+    }
+
+    public get cancelReservationWithoutRefundButton() {
+        return this.page.getByRole('button', {name: 'Anuluj bez zwrotu zapłaty'});
+    }
+
+    public async cancelReservationWithoutRefund() {
+        this.page.once('dialog', dialog => {
+            dialog.accept().catch(() => {});
+        });
+        await this.cancelReservationWithoutRefundButton.click();
     }
 }

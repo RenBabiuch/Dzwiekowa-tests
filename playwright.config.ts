@@ -27,7 +27,11 @@ export default defineConfig({
   use: {
     testIdAttribute: 'data-test',
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://192.168.1.71',
+    baseURL: 'https://dzwiekowa.pl/system-rezerwacji-envs/preview/',
+      httpCredentials: {
+          username: 'tests',
+          password: '123456',
+      },
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'retain-on-failure',
