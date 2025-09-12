@@ -35,7 +35,7 @@ export class AdminReservationPagePO {
         const paymentTypeLabelSelector = this.page.getByLabel('Typ płatności');
 
         if (paymentType === 'wszystkie') {
-            await paymentTypeLabelSelector.selectOption('', );
+            await paymentTypeLabelSelector.selectOption('');
         } else {
             await paymentTypeLabelSelector.selectOption(paymentType);
         }
