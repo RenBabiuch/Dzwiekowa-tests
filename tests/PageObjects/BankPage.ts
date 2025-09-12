@@ -17,8 +17,11 @@ export class BankPagePO {
     }
 
     public async goToPay() {
-        await expect(this.userActionsContainer).toBeVisible();
-        await this.page.waitForTimeout(500);
-        await this.payButton.click();
+        // nothing happens when clicking the button too fast
+        await expect(async() => {
+            await this.payButton.click();
+            // try again if the button doesn't disappear
+            await expect(this.payButton).not.toBeVisible({timeout: 2_000});
+        }).toPass({timeout: 10_000})
     }
 }

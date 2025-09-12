@@ -31,8 +31,14 @@ export class AdminReservationPagePO {
         await this.filterByPhoneNumInput.fill(number)
     }
 
-    public async selectPaymentType(paymentType: 'online' | 'cash') {
-        await this.page.getByLabel('Typ płatności').selectOption(paymentType);
+    public async selectPaymentType(paymentType: 'wszystkie' | 'online' | 'cash') {
+        const paymentTypeLabelSelector = this.page.getByLabel('Typ płatności');
+
+        if (paymentType === 'wszystkie') {
+            await paymentTypeLabelSelector.selectOption('', );
+        } else {
+            await paymentTypeLabelSelector.selectOption(paymentType);
+        }
     }
 
     public get firstReservationAdnotation() {

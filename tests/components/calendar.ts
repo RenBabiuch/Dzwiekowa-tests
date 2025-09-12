@@ -152,4 +152,8 @@ export class Calendar {
     public async expectReservationToBeMarkedAsFirst(date: string, startHour: number, bandName: string) {
         await expect(await this.getPreviewOfReservationElement(date, startHour, bandName)).toContainText('★');
     }
+
+    public async expectReservationNotToBeMarkedAsFirst(date: string, startHour: number, bandName: string) {
+        await expect(await this.getPreviewOfReservationElement(date, startHour, bandName)).not.toContainText('★');
+    }
 }

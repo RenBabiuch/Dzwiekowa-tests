@@ -110,14 +110,26 @@ test.describe('Cash payment', async () => {
             await pages.reservationPage.expectReservationToBeCreated(reservation2date, reservation2.startHour, userInfo.bandName, true, false);
         });
 
-        test.step('Online-payment reservation should be marked in admin panel as first', async () => {
+        await test.step('When paymentType is selected, only relevant reservations should be displayed', async() => {
             await page.goto('#admin');
             await pages.adminLoginPage.loginTheUser(adminPassword);
+            await pages.adminReservationPage.selectPaymentType('wszystkie');
             await pages.adminReservationPage.calendar.expectReservationToBeVisible(reservation1date, reservation1.startHour, userInfo.bandName, true);
             await pages.adminReservationPage.calendar.expectReservationToBeVisible(reservation2date, reservation2.startHour, userInfo.bandName, true);
-            await expect(pages.adminReservationPage.firstReservationAdnotation).toBeVisible();
+
             await pages.adminReservationPage.selectPaymentType('online');
             await pages.adminReservationPage.calendar.expectReservationToBeVisible(reservation1date, reservation1.startHour, userInfo.bandName, true);
+            await expect(await pages.adminReservationPage.calendar.getPreviewOfReservationElement(reservation2date, reservation2.startHour, userInfo.bandName)).not.toBeVisible();
+
+            await pages.adminReservationPage.selectPaymentType('cash');
+            await expect(await pages.adminReservationPage.calendar.getPreviewOfReservationElement(reservation1date, reservation1.startHour, userInfo.bandName)).not.toBeVisible();
+            await pages.adminReservationPage.calendar.expectReservationToBeVisible(reservation2date, reservation2.startHour, userInfo.bandName, true);
+        });
+
+        await test.step('Online-payment reservation should be marked in admin panel as first', async () => {
+            await page.reload();
+            await expect(pages.adminReservationPage.firstReservationAdnotation).toBeVisible();
+            await pages.adminReservationPage.calendar.expectReservationNotToBeMarkedAsFirst(reservation2date, reservation2.startHour, userInfo.bandName);
             await pages.adminReservationPage.calendar.expectReservationToBeMarkedAsFirst(reservation1date, reservation1.startHour, userInfo.bandName);
         });
     });
