@@ -30,4 +30,18 @@ export class AdminReservationPagePO {
     public async filterReservationByPhoneNum(number: string) {
         await this.filterByPhoneNumInput.fill(number)
     }
+
+    public async selectPaymentType(paymentType: 'wszystkie' | 'online' | 'cash') {
+        const paymentTypeLabelSelector = this.page.getByLabel('Typ płatności');
+
+        if (paymentType === 'wszystkie') {
+            await paymentTypeLabelSelector.selectOption('');
+        } else {
+            await paymentTypeLabelSelector.selectOption(paymentType);
+        }
+    }
+
+    public get firstReservationAdnotation() {
+        return this.page.getByText('★ → Pierwsza nieanulowana rezerwacja z tego numeru');
+    }
 }

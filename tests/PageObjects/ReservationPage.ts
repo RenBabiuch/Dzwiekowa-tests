@@ -288,6 +288,13 @@ export class ReservationPagePO {
         return Math.floor(Math.random() * 22);
     }
 
+    public async getNextHour() {
+
+        const now = new Date();
+        const currentHour = now.getHours();
+        return currentHour + 1;
+    }
+
     public async expectReservationToBeCreated(inputDate: string, startHour: number, bandName: string, successfulAlert = true, adminPanel = false) {
 
         if (successfulAlert) {
