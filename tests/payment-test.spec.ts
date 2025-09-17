@@ -110,7 +110,7 @@ test.describe('Cash payment', async () => {
             await pages.reservationPage.expectReservationToBeCreated(reservation2date, reservation2.startHour, userInfo.bandName, true, false);
         });
 
-        await test.step('When paymentType is selected, only relevant reservations should be displayed', async() => {
+        await test.step('When paymentType is selected, only relevant reservations should be displayed', async () => {
             await page.goto('#admin');
             await pages.adminLoginPage.loginTheUser(adminPassword);
             await pages.adminReservationPage.selectPaymentType('wszystkie');

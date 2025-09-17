@@ -28,7 +28,8 @@ const reservationType = {
     records: 'Nagrywka',
 } as const;
 
-// todo - cash test (next reservation)
+const adminPassword = '12345';
+
 const successfulMessage = 'Rezerwacja zapisana pomyślnie. Na podany numer telefonu otrzymasz potwierdzenie, a zaraz przed próbą wyślemy kod do drzwi.';
 const emptyFieldErrorMessage = 'Pole jest wymagane';
 
@@ -70,7 +71,7 @@ test.describe('Reservation tests', async () => {
             await pages.prePaymentPage.goToPaymentMethod();
         });
 
-        await test.step('After making the transfer, the reservation should be visible in the calendar', async() => {
+        await test.step('After making the transfer, the reservation should be visible in the calendar', async () => {
             await pages.paymentMethodMenu.goToTransferPayment();
             await pages.transferPage.selectIngBankTransfer();
             await pages.bankPage.goToPay();
@@ -332,5 +333,101 @@ test('Unsuccessful reservation when agreement checkbox is not checked', async ()
         await pages.reservationPage.submitWithCashPayment();
         await expect(pages.reservationPage.reservationFormElement).toBeInViewport();
         await expect(pages.reservationPage.bandNameInput).toHaveValue(reservation.bandName);
+    });
+});
+
+test.describe('Filters tests', async () => {
+
+    // The payment-type selector has been tested in the payment-test already
+
+    test('Successful creating reservations for different rooms at the same time - reservation-type selector works', async ({page}) => {
+        const userInfo = {
+            date: await pages.reservationPage.getSpecificDate('tomorrow'),
+            startHour: await pages.reservationPage.generateRandomHour(),
+        } as const;
+
+        const endHour = userInfo.startHour + 2;
+
+        const reservation1 = {
+            bandName: 'Blow',
+            email: 'blow@com.pl',
+            phoneNumber: await pages.reservationPage.generateRandomPhoneNumber(),
+        } as const;
+
+        const reservation2 = {
+            bandName: 'Henry_12',
+            email: 'henry12@com.pl',
+            phoneNumber: await pages.reservationPage.generateRandomPhoneNumber(),
+        } as const;
+
+        const reservation3 = {
+            bandName: 'Hungry Wolfs',
+            email: 'hungry-wolfs@com.pl',
+            phoneNumber: await pages.reservationPage.generateRandomPhoneNumber(),
+        } as const;
+
+        let reservationDate;
+
+        test.slow();
+
+        await test.step('Create first reservation', async() => {
+            await pages.reservationPage.fillTheReservationForm('Browar Miesczanski', 'Solo', reservation1.bandName, reservation1.phoneNumber, userInfo.startHour, endHour, userInfo.date);
+            reservationDate = await pages.reservationPage.getStartDateInputValue();
+            await pages.reservationPage.submitWithOnlinePayment();
+            await pages.phoneConfirmationPage.enterUserReservationCode();
+            await pages.phoneConfirmationPage.confirmAndGoToPrePayment();
+            await pages.prePaymentPage.enterEmailAddress(reservation1.email);
+            await pages.prePaymentPage.goToPaymentMethod();
+            await pages.paymentMethodMenu.goToTransferPayment();
+            await pages.transferPage.selectIngBankTransfer();
+            await pages.bankPage.goToPay();
+            await pages.reservationPage.expectReservationToBeCreated(reservationDate, userInfo.startHour, reservation1.bandName, false, false);
+        });
+
+        await test.step('Create second reservation for the same hour', async() => {
+            await pages.reservationPage.fillTheReservationForm('Stary Mlyn', 'Nagrywka', reservation2.bandName, reservation2.phoneNumber, userInfo.startHour, endHour, userInfo.date);
+            await pages.reservationPage.submitWithOnlinePayment();
+            await pages.phoneConfirmationPage.enterUserReservationCode();
+            await pages.phoneConfirmationPage.confirmAndGoToPrePayment();
+            await pages.prePaymentPage.enterEmailAddress(reservation2.email);
+            await pages.prePaymentPage.goToPaymentMethod();
+            await pages.paymentMethodMenu.goToTransferPayment();
+            await pages.transferPage.selectIngBankTransfer();
+            await pages.bankPage.goToPay();
+            await pages.reservationPage.expectReservationToBeCreated(reservationDate, userInfo.startHour, reservation2.bandName, false, false);
+        });
+
+        await test.step('Create third reservation for the same hour and go to the admin panel', async() => {
+            await pages.reservationPage.fillTheReservationForm('Tęczowa 57', 'Zespół', reservation3.bandName, reservation3.phoneNumber, userInfo.startHour, endHour, userInfo.date);
+            await pages.reservationPage.submitWithOnlinePayment();
+            await pages.phoneConfirmationPage.enterUserReservationCode();
+            await pages.phoneConfirmationPage.confirmAndGoToPrePayment();
+            await pages.prePaymentPage.enterEmailAddress(reservation3.email);
+            await pages.prePaymentPage.goToPaymentMethod();
+            await pages.paymentMethodMenu.goToTransferPayment();
+            await pages.transferPage.selectIngBankTransfer();
+            await pages.bankPage.goToPay();
+            await pages.reservationPage.expectReservationToBeCreated(reservationDate, userInfo.startHour, reservation3.bandName, false, false);
+
+            await page.goto('#admin');
+            await pages.adminLoginPage.loginTheUser(adminPassword);
+        });
+
+        await test.step('When reservationType is selected, only relevant reservations should be displayed', async() => {
+            await pages.adminReservationPage.selectReservationType('Solo');
+            await pages.adminReservationPage.calendar.expectReservationToBeVisible(reservationDate, userInfo.startHour, reservation1.bandName, true);
+            await expect(await pages.adminReservationPage.calendar.getPreviewOfReservationElement(reservationDate, userInfo.startHour, reservation2.bandName)).not.toBeVisible();
+            await expect(await pages.adminReservationPage.calendar.getPreviewOfReservationElement(reservationDate, userInfo.startHour, reservation3.bandName)).not.toBeVisible();
+
+            await pages.adminReservationPage.selectReservationType('Nagrywka');
+            await pages.adminReservationPage.calendar.expectReservationToBeVisible(reservationDate, userInfo.startHour, reservation2.bandName, true);
+            await expect(await pages.adminReservationPage.calendar.getPreviewOfReservationElement(reservationDate, userInfo.startHour, reservation1.bandName)).not.toBeVisible();
+            await expect(await pages.adminReservationPage.calendar.getPreviewOfReservationElement(reservationDate, userInfo.startHour, reservation3.bandName)).not.toBeVisible();
+
+            await pages.adminReservationPage.selectReservationType('Zespół');
+            await pages.adminReservationPage.calendar.expectReservationToBeVisible(reservationDate, userInfo.startHour, reservation3.bandName, true);
+            await expect(await pages.adminReservationPage.calendar.getPreviewOfReservationElement(reservationDate, userInfo.startHour, reservation2.bandName)).not.toBeVisible();
+            await expect(await pages.adminReservationPage.calendar.getPreviewOfReservationElement(reservationDate, userInfo.startHour, reservation1.bandName)).not.toBeVisible();
+        });
     });
 });
