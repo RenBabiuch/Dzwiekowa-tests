@@ -2,7 +2,7 @@ import {expect, Page} from "@playwright/test";
 import {Calendar} from "../components/calendar";
 import {DateAndTimePicker} from "../components/date-and-time-picker";
 
-type roomNameType = 'Wszystkie' | 'Browar Miesczanski' | 'Stary Mlyn';
+type roomNameType = 'Wszystkie' | 'Browar Miesczanski' | 'Stary Mlyn' | 'Tęczowa 57';
 type reservationTypeNameType = 'Wybierz...' | 'Zespół' | 'Solo' | 'Nagrywka';
 type dayNameType = 'yesterday' | 'today' | 'tomorrow' | 'day after tomorrow';
 
@@ -32,7 +32,8 @@ export class ReservationPagePO {
 
         const roomNameToNumberMap = {
             'Browar Miesczanski': '1',
-            'Stary Mlyn': '2'
+            'Stary Mlyn': '2',
+            'Tęczowa 57': '3',
         }
 
         await this.rehearsalRoomElement.click();

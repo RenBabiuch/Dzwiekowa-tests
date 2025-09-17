@@ -12,7 +12,7 @@ import {AdminReservationDetailsPagePO} from "./Admin-ReservationDetailsPage";
 import {AdminBlockedNumbersPagePO} from "./Admin-BlockedNumbersPage";
 
 export default function initialise(page: Page) {
-    return{
+    return {
         reservationPage: new ReservationPagePO(page),
         phoneConfirmationPage: new PhoneConfirmationPagePO(page),
         prePaymentPage: new PrePaymentPagePO(page),

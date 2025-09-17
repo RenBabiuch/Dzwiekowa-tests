@@ -44,4 +44,9 @@ export class AdminReservationPagePO {
     public get firstReservationAdnotation() {
         return this.page.getByText('★ → Pierwsza nieanulowana rezerwacja z tego numeru');
     }
+
+    public async selectReservationType(type: 'Wszystkie' | 'Solo' | 'Zespół' | 'Solo z talerzami' | 'Nagrywka' | 'Lekcja/Duet' | 'Próba 5+więcej') {
+        const reservationTypeLabelSelector = this.page.locator('.justify-between').getByLabel('Typ rezerwacji');
+        await reservationTypeLabelSelector.selectOption({label: type});
+    }
 }
