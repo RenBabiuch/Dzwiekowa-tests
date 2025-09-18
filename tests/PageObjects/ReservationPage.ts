@@ -113,7 +113,7 @@ export class ReservationPagePO {
 
         const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
         const randomNumStr = String(randomNum).padStart(7,"0");
-        return randomBeginningValue + randomNumStr.substring(0,1) + ' ' + randomNumStr.substring(1,4) + ' ' + randomNumStr.substring(4,7);
+        return randomBeginningValue + randomNumStr.substring(0,1) + randomNumStr.substring(1,4) + randomNumStr.substring(4,7);
     }
 
     public async getStartDateInputValue() {
