@@ -410,6 +410,7 @@ test.describe('Filters tests', async () => {
             await pages.reservationPage.expectReservationToBeCreated(reservationDate, userInfo.startHour, reservation3.bandName, false, false);
 
             await page.goto('#admin');
+            await page.reload();
             await pages.adminLoginPage.loginTheUser(adminPassword);
         });
 

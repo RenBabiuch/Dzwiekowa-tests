@@ -2,31 +2,31 @@ import {expect, test} from "@playwright/test";
 import initialise from "./PageObjects/initialise";
 
 let pages: ReturnType<typeof initialise>;
-let reservation: {date: Date; bandName: string; startHour: number; email: string};
 test.beforeEach(async ({page}) => {
-    pages = initialise(page)
+    pages = initialise(page);
 
-     reservation = {
+    await page.goto('');
+});
+
+    const adminPassword = '12345';
+    const phoneNumErrorMessage = 'Ten numer ma zablokowaną opcję dodawania rezerwacji. Skontaktuj się z nami w celu wyjaśnienia sprawy';
+
+test('Blocking phone numbers from the Block-Number Page - works', async({page}) => {
+
+    const reservation = {
         bandName: 'Timanfaya',
-        email: 'timanfaya@com.pl',
+        email: 'renbabiuch@gmail.com',
         date: await pages.reservationPage.getSpecificDate('tomorrow'),
         startHour: await pages.reservationPage.generateRandomHour(),
-    } as const;
-
-});
-    const adminPassword = '12345';
-
-test('Complete blocking phone numbers works', async({page}) => {
+    };
 
     const reasonForBlocking = 'Zniszczenie instrumentów';
-    const phoneNumErrorMessage = 'Ten numer ma zablokowaną opcję dodawania rezerwacji. Skontaktuj się z nami w celu wyjaśnienia sprawy';
     const endHour =  reservation.startHour + 2;
     const blockedNumber = '579823433';
 
     test.slow();
 
     await test.step('Go to create first reservation', async() => {
-        await page.goto('');
         await pages.reservationPage.fillTheReservationForm('Browar Miesczanski', 'Zespół', reservation.bandName, blockedNumber, reservation.startHour, endHour, reservation.date);
 
         let reservationDate = await pages.reservationPage.getStartDateInputValue();
@@ -48,7 +48,7 @@ test('Complete blocking phone numbers works', async({page}) => {
         await pages.adminReservationPage.adminHeader.goToBlockNumbers();
         await pages.adminBlockedNumbersPage.fillAndConfirmBlockNumberForm(blockedNumber, 'blocked', reasonForBlocking);
         await expect(pages.adminBlockedNumbersPage.blockedNumbersContainer).toBeVisible();
-        await expect(await pages.adminBlockedNumbersPage.blockedNumberElement(blockedNumber)).toBeVisible();
+        await expect(await pages.adminBlockedNumbersPage.getBlockedNumberElement(blockedNumber)).toBeVisible();
     });
 
         const reservationNewStartHour = reservation.startHour + 3;
@@ -66,9 +66,9 @@ test('Complete blocking phone numbers works', async({page}) => {
         await page.goto('#admin');
         await page.reload();
         await pages.adminReservationPage.adminHeader.goToBlockNumbers();
-        await expect(await pages.adminBlockedNumbersPage.blockedNumberElement(blockedNumber)).toBeVisible();
+        await expect(await pages.adminBlockedNumbersPage.getBlockedNumberElement(blockedNumber)).toBeVisible();
         await pages.adminBlockedNumbersPage.unlockPhoneNumber(blockedNumber);
-        await expect(await pages.adminBlockedNumbersPage.blockedNumberElement(blockedNumber)).not.toBeVisible();
+        await expect(await pages.adminBlockedNumbersPage.getBlockedNumberElement(blockedNumber)).not.toBeVisible();
 
         await page.goto('');
         await page.reload();
@@ -83,5 +83,63 @@ test('Complete blocking phone numbers works', async({page}) => {
         await pages.transferPage.selectIngBankTransfer();
         await pages.bankPage.goToPay();
         await pages.reservationPage.expectReservationToBeCreated(reservationNewDate, reservationNewStartHour, reservation.bandName, false, false);
+    });
+});
+
+test('Blocking phone numbers from the reservation details level - works', async({page}) => {
+
+    const userInfo = {
+        bandName: 'details_of_music',
+        email: 'renbabiuch@gmail.com',
+        phoneNumber: await pages.reservationPage.generateRandomPhoneNumber(),
+        date: await pages.reservationPage.getSpecificDate('day after tomorrow'),
+        blockReason: 'Band plays too loud',
+    } as const;
+
+    const reservationStartHour = await pages.reservationPage.generateRandomHour();
+    const reservationEndHour = reservationStartHour + 2;
+
+    const reservationNewStartHour = reservationEndHour + 2;
+    const reservationNewEndHour = reservationNewStartHour + 2;
+
+    let reservationDate;
+    let reservationPrice;
+
+    test.slow();
+
+    await test.step('Create reservation and log in to admin panel', async() => {
+        await pages.reservationPage.fillTheReservationForm('Tęczowa 57', 'Zespół', userInfo.bandName, userInfo.phoneNumber, reservationStartHour, reservationEndHour, userInfo.date);
+        reservationDate = await pages.reservationPage.getStartDateInputValue();
+        reservationPrice = await pages.reservationPage.getOnlineReservationPrice();
+
+        await pages.reservationPage.submitWithOnlinePayment();
+        await pages.phoneConfirmationPage.enterUserReservationCode();
+        await pages.phoneConfirmationPage.confirmAndGoToPrePayment();
+        await pages.prePaymentPage.enterEmailAddress(userInfo.email);
+        await pages.prePaymentPage.goToPaymentMethod();
+        await pages.paymentMethodMenu.goToTransferPayment();
+        await pages.transferPage.selectIngBankTransfer();
+        await pages.bankPage.goToPay();
+        await pages.reservationPage.expectReservationToBeCreated(reservationDate, reservationStartHour, userInfo.bandName, false, false);
+
+        await page.goto('#admin');
+        await pages.adminLoginPage.loginTheUser(adminPassword);
+    });
+
+    await test.step('Open reservation details and block phone number - details should be visible in the Block-Number Page', async() => {
+        await pages.adminReservationPage.calendar.clickToSeeReservationDetails(reservationDate, reservationStartHour,userInfo.bandName);
+        await pages.adminReservationDetailsPage.blockPhoneNumber();
+        await expect(pages.adminBlockedNumbersPage.blockedNumbersContainer).toBeVisible();
+        await pages.adminBlockedNumbersPage.enterBlockNumberReason(userInfo.blockReason);
+        await pages.adminBlockedNumbersPage.confirmNumberBlocking();
+        await expect(pages.adminBlockedNumbersPage.getBlockedNumberElement(userInfo.phoneNumber)).toBeVisible();
+        await pages.adminBlockedNumbersPage.expectReservationDetailsOfBlockedNumberToBeVisible(userInfo.phoneNumber, userInfo.bandName, reservationDate, reservationStartHour, reservationEndHour, reservationPrice);
+    });
+
+    await test.step('After creating new reservation for blocked number - error message should be displayed', async() => {
+        await page.goto('');
+        await pages.reservationPage.fillTheReservationForm('Tęczowa 57', 'Zespół', userInfo.bandName, userInfo.phoneNumber, reservationNewStartHour, reservationNewEndHour, userInfo.date);
+        await pages.reservationPage.submitWithOnlinePayment();
+        await pages.reservationPage.expectPhoneNumErrorMessageToBe(phoneNumErrorMessage);
     });
 });
