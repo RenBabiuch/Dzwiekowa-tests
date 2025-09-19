@@ -9,10 +9,9 @@ test.beforeEach(async({page}) => {
 });
 
 test('Successful log in with correct data', async() => {
-   const password = '12345';
 
    await test.step('After logging in, admin panel with correct data should appear', async() => {
-      await pages.adminLoginPage.loginTheUser(password);
+      await pages.adminLoginPage.loginTheUser();
       await expect(pages.adminReservationPage.adminHeader.loggedToAdminPanelInfo).toBeVisible();
       await expect(pages.adminReservationPage.calendarElement).toBeVisible();
       await pages.adminReservationPage.adminHeader.goToManageRooms();

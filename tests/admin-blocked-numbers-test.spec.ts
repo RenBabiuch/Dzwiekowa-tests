@@ -2,19 +2,17 @@ import {expect, test} from "@playwright/test";
 import initialise from "./PageObjects/initialise";
 
 let pages: ReturnType<typeof initialise>;
-let reservation: {date: Date; bandName: string; startHour: number; email: string};
+let reservation: {date: Date; bandName: string; startHour: number};
 test.beforeEach(async ({page}) => {
     pages = initialise(page)
 
      reservation = {
         bandName: 'Timanfaya',
-        email: 'timanfaya@com.pl',
         date: await pages.reservationPage.getSpecificDate('tomorrow'),
         startHour: await pages.reservationPage.generateRandomHour(),
     } as const;
 
 });
-    const adminPassword = '12345';
 
 test('Complete blocking phone numbers works', async({page}) => {
 
@@ -34,7 +32,7 @@ test('Complete blocking phone numbers works', async({page}) => {
         await pages.reservationPage.submitWithOnlinePayment();
         await pages.phoneConfirmationPage.enterUserReservationCode();
         await pages.phoneConfirmationPage.confirmAndGoToPrePayment();
-        await pages.prePaymentPage.enterEmailAddress(reservation.email);
+        await pages.prePaymentPage.enterEmailAddress();
         await pages.prePaymentPage.goToPaymentMethod();
         await pages.paymentMethodMenu.goToTransferPayment();
         await pages.transferPage.selectIngBankTransfer();
@@ -44,7 +42,7 @@ test('Complete blocking phone numbers works', async({page}) => {
 
     await test.step('Go to block the phone number of the problematic user', async() => {
         await page.goto('#admin');
-        await pages.adminLoginPage.loginTheUser(adminPassword);
+        await pages.adminLoginPage.loginTheUser();
         await pages.adminReservationPage.adminHeader.goToBlockNumbers();
         await pages.adminBlockedNumbersPage.fillAndConfirmBlockNumberForm(blockedNumber, 'blocked', reasonForBlocking);
         await expect(pages.adminBlockedNumbersPage.blockedNumbersContainer).toBeVisible();
@@ -77,7 +75,7 @@ test('Complete blocking phone numbers works', async({page}) => {
         let reservationNewDate = await pages.reservationPage.getStartDateInputValue();
 
         await pages.reservationPage.submitWithOnlinePayment();
-        await pages.prePaymentPage.enterEmailAddress(reservation.email);
+        await pages.prePaymentPage.enterEmailAddress();
         await pages.prePaymentPage.goToPaymentMethod();
         await pages.paymentMethodMenu.goToTransferPayment();
         await pages.transferPage.selectIngBankTransfer();
