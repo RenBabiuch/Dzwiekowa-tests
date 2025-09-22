@@ -165,7 +165,8 @@ test('Unsuccessful creating a reservation for an already booked date', async () 
     const roomOccupancyErrorMessage = 'Czas rezerwacji pokrywa się z innymi wpisami.';
 
     await test.step('Book a rehear-room for the first band', async () => {
-        await pages.reservationPage.reservationForm.fillTheReservationForm(roomsName.num2, reservationType.band, reservation.bandName1, generated.phoneNum, generated.startHour, reservation.endHour, reservation.date);
+        await pages.reservationPage.reservationForm.enterDataToTheReservationForm(roomsName.num2, reservationType.band, reservation.bandName1, generated.phoneNum, generated.startHour, reservation.endHour, reservation.date);
+        await pages.reservationPage.selectAgreementCheckbox();
         await pages.reservationPage.submitWithOnlinePayment();
 
         reservationDate = await pages.reservationPage.reservationForm.getStartDateInputValue();
@@ -181,7 +182,8 @@ test('Unsuccessful creating a reservation for an already booked date', async () 
     });
 
     await test.step('After creating a reservation for the same - already booked - date, an error message should appear', async () => {
-        await pages.reservationPage.reservationForm.fillTheReservationForm(roomsName.num2, reservationType.band, reservation.bandName2, generated.phoneNum, generated.startHour, reservation.endHour, reservation.date);
+        await pages.reservationPage.reservationForm.enterDataToTheReservationForm(roomsName.num2, reservationType.band, reservation.bandName2, generated.phoneNum, generated.startHour, reservation.endHour, reservation.date);
+        await pages.reservationPage.selectAgreementCheckbox();
         await pages.reservationPage.submitWithOnlinePayment();
         await pages.reservationPage.reservationForm.expectEndDateErrorMessageToBe(roomOccupancyErrorMessage)
     });

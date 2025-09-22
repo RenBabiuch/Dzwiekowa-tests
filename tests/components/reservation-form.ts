@@ -1,7 +1,5 @@
 import {expect, Page} from "@playwright/test";
 import {DateAndTimePicker} from "./date-and-time-picker";
-import {ReservationPagePO} from "../PageObjects/ReservationPage";
-
 
 type roomNameType = 'Wszystkie' | 'Browar Miesczanski' | 'Stary Mlyn' | 'Tęczowa 57';
 type reservationTypeNameType = 'Wybierz...' | 'Zespół' | 'Solo' | 'Nagrywka';
@@ -12,7 +10,6 @@ export class ReservationForm {
     }
 
     dateAndTimePicker = new DateAndTimePicker(this.page);
-    reservationPage = new ReservationPagePO(this.page);
 
     reservationTypeIdSelector = 'form-reservation-type';
     bandNameFieldSelector = this.page.getByTestId('form-band-name');
@@ -178,13 +175,12 @@ export class ReservationForm {
         }
     }
 
-    public async fillTheReservationForm(room: roomNameType, type: reservationTypeNameType, bandName: string, phoneNum: string, startHour: number, endHour: number, startDay: Date, endDay?: Date) {
+    public async enterDataToTheReservationForm(room: roomNameType, type: reservationTypeNameType, bandName: string, phoneNum: string, startHour: number, endHour: number, startDay: Date, endDay?: Date) {
         await this.selectRehearsalRoom(room);
         await this.selectReservationType(type);
         await this.enterBandName(bandName);
         await this.enterPhoneNumber(phoneNum);
         await this.enterDatesAndTime(startDay, startHour, endHour, endDay);
-        await this.reservationPage.selectAgreementCheckbox();
     }
 
     public async expectSelectedTimeToBe(startHour: number, endHour: number) {
@@ -229,7 +225,11 @@ export class ReservationForm {
         return currentHour + 1;
     }
 
+    public get successfulReservationAlert() {
+        return this.page.getByTestId('successful-reservation');
+    }
+
     public async closeSuccessfulReservationAlert() {
-        await this.reservationPage.successfulReservationAlert.getByTestId('accept').click();
+        await this.successfulReservationAlert.click();
     }
 }

@@ -71,10 +71,6 @@ export class ReservationPagePO {
         await expect(this.formInputFieldSelector.last()).toContainText(message);
     }
 
-    public get successfulReservationAlert() {
-        return this.page.getByTestId('successful-reservation');
-    }
-
     public async expectReservationToBeCreated(inputDate: string, startHour: number, bandName: string, successfulAlert = true, adminPanel = false) {
 
         if (successfulAlert) {
