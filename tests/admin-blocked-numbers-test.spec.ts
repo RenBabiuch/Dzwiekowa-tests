@@ -25,11 +25,10 @@ test('Complete blocking phone numbers works', async({page}) => {
 
     await test.step('Go to create first reservation', async() => {
         await page.goto('');
-        await pages.reservationPage.reservationForm.enterDataToTheReservationForm('Browar Miesczanski', 'Zespół', reservation.bandName, blockedNumber, reservation.startHour, endHour, reservation.date);
+        await pages.reservationPage.fillTheFormAndCheckCheckbox('Browar Miesczanski', 'Zespół', reservation.bandName, blockedNumber, reservation.startHour, endHour, reservation.date);
 
         let reservationDate = await pages.reservationPage.reservationForm.getStartDateInputValue();
 
-        await pages.reservationPage.selectAgreementCheckbox();
         await pages.reservationPage.submitWithOnlinePayment();
         await pages.phoneConfirmationPage.enterUserReservationCode();
         await pages.phoneConfirmationPage.confirmAndGoToPrePayment();
@@ -56,8 +55,7 @@ test('Complete blocking phone numbers works', async({page}) => {
     await test.step('Go to create reservation with blocked number - the phone number error message should appear', async() => {
         await page.goto('');
         await page.reload();
-        await pages.reservationPage.reservationForm.enterDataToTheReservationForm('Browar Miesczanski', 'Zespół', reservation.bandName, blockedNumber, reservationNewStartHour, reservationNewEndHour, reservation.date);
-        await pages.reservationPage.selectAgreementCheckbox();
+        await pages.reservationPage.fillTheFormAndCheckCheckbox('Browar Miesczanski', 'Zespół', reservation.bandName, blockedNumber, reservationNewStartHour, reservationNewEndHour, reservation.date);
         await pages.reservationPage.submitWithOnlinePayment();
         await pages.reservationPage.reservationForm.expectPhoneNumErrorMessageToBe(phoneNumErrorMessage);
     });
@@ -72,11 +70,10 @@ test('Complete blocking phone numbers works', async({page}) => {
 
         await page.goto('');
         await page.reload();
-        await pages.reservationPage.reservationForm.enterDataToTheReservationForm('Browar Miesczanski', 'Zespół', reservation.bandName, blockedNumber, reservationNewStartHour, reservationNewEndHour, reservation.date);
+        await pages.reservationPage.fillTheFormAndCheckCheckbox('Browar Miesczanski', 'Zespół', reservation.bandName, blockedNumber, reservationNewStartHour, reservationNewEndHour, reservation.date);
 
         let reservationNewDate = await pages.reservationPage.reservationForm.getStartDateInputValue();
 
-        await pages.reservationPage.selectAgreementCheckbox();
         await pages.reservationPage.submitWithOnlinePayment();
         await pages.prePaymentPage.enterEmailAddress();
         await pages.prePaymentPage.goToPaymentMethod();

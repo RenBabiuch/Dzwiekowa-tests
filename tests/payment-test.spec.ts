@@ -79,10 +79,9 @@ test.describe('Cash payment', async () => {
         await test.step('Create online-payment reservation starting in an hour - the user won`t be able to cancel already', async () => {
             const endHour = reservation1.startHour + 2;
 
-            await pages.reservationPage.reservationForm.enterDataToTheReservationForm('Browar Miesczanski', 'Solo', userInfo.bandName, userInfo.phoneNum, reservation1.startHour, endHour, reservation1.startDate);
+            await pages.reservationPage.fillTheFormAndCheckCheckbox('Browar Miesczanski', 'Solo', userInfo.bandName, userInfo.phoneNum, reservation1.startHour, endHour, reservation1.startDate);
             reservation1date = await pages.reservationPage.reservationForm.getStartDateInputValue();
 
-            await pages.reservationPage.selectAgreementCheckbox();
             await expect(pages.reservationPage.submitWithCashPaymentButton).not.toBeVisible();
             await pages.reservationPage.submitWithOnlinePayment();
             await pages.phoneConfirmationPage.enterUserReservationCode();
@@ -98,10 +97,9 @@ test.describe('Cash payment', async () => {
         await test.step('After creating second reservation for the same user, cash payment should be possible', async () => {
             const endHour = reservation2.startHour + 2;
 
-            await pages.reservationPage.reservationForm.enterDataToTheReservationForm('Browar Miesczanski', 'Nagrywka', userInfo.bandName, userInfo.phoneNum, reservation2.startHour, endHour, reservation2.startDate);
+            await pages.reservationPage.fillTheFormAndCheckCheckbox('Browar Miesczanski', 'Nagrywka', userInfo.bandName, userInfo.phoneNum, reservation2.startHour, endHour, reservation2.startDate);
             reservation2date = await pages.reservationPage.reservationForm.getStartDateInputValue();
 
-            await pages.reservationPage.selectAgreementCheckbox();
             await expect(pages.reservationPage.submitWithCashPaymentButton).toBeVisible();
             await pages.reservationPage.submitWithCashPayment();
             await expect(pages.reservationPage.reservationForm.successfulReservationAlert).toBeVisible();

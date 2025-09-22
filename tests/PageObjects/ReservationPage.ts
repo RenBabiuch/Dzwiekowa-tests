@@ -2,6 +2,9 @@ import {expect, Page} from "@playwright/test";
 import {Calendar} from "../components/calendar";
 import {ReservationForm} from "../components/reservation-form";
 
+type roomNameType = 'Wszystkie' | 'Browar Miesczanski' | 'Stary Mlyn' | 'Tęczowa 57';
+type reservationTypeNameType = 'Wybierz...' | 'Zespół' | 'Solo' | 'Nagrywka';
+
 export class ReservationPagePO {
     constructor(private page: Page) {
     }
@@ -17,6 +20,11 @@ export class ReservationPagePO {
 
     public async selectAgreementCheckbox() {
         await this.agreementCheckbox.click();
+    }
+
+    public async fillTheFormAndCheckCheckbox(room: roomNameType, type: reservationTypeNameType, bandName: string, phoneNum: string, startHour: number, endHour: number, startDay: Date, endDay?: Date) {
+        await this.reservationForm.enterDataToTheReservationForm(room, type, bandName, phoneNum, startHour, endHour, startDay);
+        await this.selectAgreementCheckbox();
     }
 
     public get submitWithOnlinePaymentButton() {

@@ -23,12 +23,11 @@ test('Reservation with correct data is visible in the admin panel and can be can
     let currentPrice;
 
        await test.step('Create a valid reservation in user`s view - it should be visible in calendar', async() => {
-        await pages.reservationPage.reservationForm.enterDataToTheReservationForm('Browar Miesczanski', 'Zespół', reservation.bandName, reservation.phone, reservation.startHour, endHour, reservation.date);
+        await pages.reservationPage.fillTheFormAndCheckCheckbox('Browar Miesczanski', 'Zespół', reservation.bandName, reservation.phone, reservation.startHour, endHour, reservation.date);
 
         reservationDate = await pages.reservationPage.reservationForm.getStartDateInputValue();
         currentPrice = await pages.reservationPage.getOnlineReservationPrice();
 
-        await pages.reservationPage.selectAgreementCheckbox();
         await pages.reservationPage.submitWithOnlinePayment();
         await pages.phoneConfirmationPage.enterUserReservationCode();
         await pages.phoneConfirmationPage.confirmAndGoToPrePayment();
