@@ -4,6 +4,9 @@ import {expect, test} from "@playwright/test";
 let pages: ReturnType<typeof initialise>;
 test.beforeEach(async({page}) => {
     pages = initialise(page);
+
+    await page.goto('#admin');
+    await pages.adminLoginPage.loginTheUser();
 });
 
 test.describe('Filters tests', async () => {
@@ -12,79 +15,51 @@ test.describe('Filters tests', async () => {
 
     test('Reservation-type selector works', async ({page}) => {
         const userInfo = {
-            date: await pages.reservationPage.reservationForm.getSpecificDate('tomorrow'),
-            startHour: await pages.reservationPage.reservationForm.generateRandomHour(),
+            date: await pages.adminReservationPage.reservationForm.getSpecificDate('tomorrow'),
+            startHour: await pages.adminReservationPage.reservationForm.generateRandomHour(),
         } as const;
 
         const endHour = userInfo.startHour + 2;
 
         const reservation1 = {
             bandName: 'Blow',
-            phoneNumber: await pages.reservationPage.reservationForm.generateRandomPhoneNumber(),
+            phoneNumber: await pages.adminReservationPage.reservationForm.generateRandomPhoneNumber(),
         } as const;
 
         const reservation2 = {
             bandName: 'Henry_12',
-            phoneNumber: await pages.reservationPage.reservationForm.generateRandomPhoneNumber(),
+            phoneNumber: await pages.adminReservationPage.reservationForm.generateRandomPhoneNumber(),
         } as const;
 
         const reservation3 = {
             bandName: 'Hungry Wolfs',
-            phoneNumber: await pages.reservationPage.reservationForm.generateRandomPhoneNumber(),
+            phoneNumber: await pages.adminReservationPage.reservationForm.generateRandomPhoneNumber(),
         } as const;
 
         let reservationDate: string;
 
         test.slow();
 
-        await test.step('Create first reservation', async() => {
-            await page.goto('');
-            await pages.reservationPage.reservationForm.enterDataToTheReservationForm('Browar Miesczanski', 'Solo', reservation1.bandName, reservation1.phoneNumber, userInfo.startHour, endHour, userInfo.date);
-            reservationDate = await pages.reservationPage.reservationForm.getStartDateInputValue();
-            await pages.reservationPage.selectAgreementCheckbox();
-            await pages.reservationPage.submitWithOnlinePayment();
-            await pages.phoneConfirmationPage.enterUserReservationCode();
-            await pages.phoneConfirmationPage.confirmAndGoToPrePayment();
-            await pages.prePaymentPage.enterEmailAddress();
-            await pages.prePaymentPage.goToPaymentMethod();
-            await pages.paymentMethodMenu.goToTransferPayment();
-            await pages.transferPage.selectIngBankTransfer();
-            await pages.bankPage.goToPay();
-            await pages.reservationPage.expectReservationToBeCreated(reservationDate, userInfo.startHour, reservation1.bandName, false, false);
-        });
+        await test.step('Create three different reservations for the same hour', async() => {
+            await pages.adminReservationPage.reservationForm.enterDataToTheReservationForm('Browar Miesczanski', 'Solo', reservation1.bandName, reservation1.phoneNumber, userInfo.startHour, endHour, userInfo.date);
 
-        await test.step('Create second reservation for the same hour', async() => {
-            await pages.reservationPage.reservationForm.enterDataToTheReservationForm('Stary Mlyn', 'Nagrywka', reservation2.bandName, reservation2.phoneNumber, userInfo.startHour, endHour, userInfo.date);
-            await pages.reservationPage.selectAgreementCheckbox();
-            await pages.reservationPage.submitWithOnlinePayment();
-            await pages.phoneConfirmationPage.enterUserReservationCode();
-            await pages.phoneConfirmationPage.confirmAndGoToPrePayment();
-            await pages.prePaymentPage.enterEmailAddress();
-            await pages.prePaymentPage.goToPaymentMethod();
-            await pages.paymentMethodMenu.goToTransferPayment();
-            await pages.transferPage.selectIngBankTransfer();
-            await pages.bankPage.goToPay();
-            await pages.reservationPage.expectReservationToBeCreated(reservationDate, userInfo.startHour, reservation2.bandName, false, false);
-        });
+            reservationDate = await pages.adminReservationPage.reservationForm.getStartDateInputValue();
 
-        await test.step('Create third reservation for the same hour and go to the admin panel', async() => {
-            await pages.reservationPage.reservationForm.enterDataToTheReservationForm('Tęczowa 57', 'Zespół', reservation3.bandName, reservation3.phoneNumber, userInfo.startHour, endHour, userInfo.date);
-            await pages.reservationPage.selectAgreementCheckbox();
-            await pages.reservationPage.submitWithOnlinePayment();
-            await pages.phoneConfirmationPage.enterUserReservationCode();
-            await pages.phoneConfirmationPage.confirmAndGoToPrePayment();
-            await pages.prePaymentPage.enterEmailAddress();
-            await pages.prePaymentPage.goToPaymentMethod();
-            await pages.paymentMethodMenu.goToTransferPayment();
-            await pages.transferPage.selectIngBankTransfer();
-            await pages.bankPage.goToPay();
-            await pages.reservationPage.expectReservationToBeCreated(reservationDate, userInfo.startHour, reservation3.bandName, false, false);
+            await pages.adminReservationPage.submitWithCashPayment();
+            await expect(pages.adminReservationPage.reservationForm.successfulReservationAlert).toBeVisible();
+            await pages.adminReservationPage.expectReservationToBeCreated(reservationDate, userInfo.startHour, reservation1.bandName);
 
-            await page.goto('#admin');
-            await pages.adminLoginPage.loginTheUser();
+            await pages.adminReservationPage.reservationForm.enterDataToTheReservationForm('Stary Mlyn', 'Nagrywka', reservation2.bandName, reservation2.phoneNumber, userInfo.startHour, endHour, userInfo.date);
+            await pages.adminReservationPage.submitWithCashPayment();
+            await pages.adminReservationPage.expectReservationToBeCreated(reservationDate, userInfo.startHour, reservation2.bandName);
+
+            await pages.adminReservationPage.reservationForm.enterDataToTheReservationForm('Tęczowa 57', 'Zespół', reservation3.bandName, reservation3.phoneNumber, userInfo.startHour, endHour, userInfo.date);
+            await pages.adminReservationPage.submitWithCashPayment();
+            await pages.adminReservationPage.expectReservationToBeCreated(reservationDate, userInfo.startHour, reservation3.bandName);
         });
 
         await test.step('When reservationType is selected, only relevant reservations should be displayed', async() => {
+            await page.reload();
             await pages.adminReservationPage.filters.filterByReservationType('Solo');
             await pages.adminReservationPage.calendar.expectReservationToBeVisible(reservationDate, userInfo.startHour, reservation1.bandName, true);
             await expect(await pages.adminReservationPage.calendar.getPreviewOfReservationElement(reservationDate, userInfo.startHour, reservation2.bandName)).toBeHidden();

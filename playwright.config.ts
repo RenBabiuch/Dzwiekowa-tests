@@ -32,7 +32,6 @@ export default defineConfig({
           username: 'tests',
           password: '123456',
       },
-
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'retain-on-failure',
     video: 'retain-on-failure'
@@ -42,7 +41,10 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...devices['Desktop Chrome'], viewport: {
+          width: 1280,
+              height: 1280,
+          } },
     },
 
     // {

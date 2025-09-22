@@ -230,6 +230,6 @@ export class ReservationForm {
     }
 
     public async closeSuccessfulReservationAlert() {
-        await this.successfulReservationAlert.click();
+        await this.successfulReservationAlert.getByTestId('accept').click();
     }
 }
