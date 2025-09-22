@@ -8,8 +8,6 @@ test.beforeEach(async ({page}) => {
     await page.goto('');
 });
 
-const adminPassword = '12345';
-
 test.describe('Online payments', async () => {
     test('Successful online payment', async () => {
         const reservation = {
@@ -17,7 +15,6 @@ test.describe('Online payments', async () => {
             phone: await pages.reservationPage.generateRandomPhoneNumber(),
             date: await pages.reservationPage.getSpecificDate('day after tomorrow'),
             startHour: await pages.reservationPage.generateRandomHour(),
-            email: 'songs@karaoke.pl',
         } as const;
         const endHour = reservation.startHour + 2;
 
@@ -42,7 +39,7 @@ test.describe('Online payments', async () => {
 
         await test.step('Enter email address and go to transfer payment - the amount should be the same as at the beginning', async () => {
             await expect(pages.prePaymentPage.emailVerificationContainer).toBeVisible();
-            await pages.prePaymentPage.enterEmailAddress(reservation.email);
+            await pages.prePaymentPage.enterEmailAddress();
             await pages.prePaymentPage.goToPaymentMethod();
             await expect(pages.paymentMethodMenu.paymentContainer).toBeVisible();
             await pages.paymentMethodMenu.goToTransferPayment();
@@ -64,7 +61,6 @@ test.describe('Cash payment', async () => {
         const userInfo = {
             bandName: 'Hey_Dudes',
             phoneNum: await pages.reservationPage.generateRandomPhoneNumber(),
-            email: 'hey_dudes@com.pl',
         } as const;
 
         const reservation1 = {
@@ -90,7 +86,7 @@ test.describe('Cash payment', async () => {
             await pages.reservationPage.submitWithOnlinePayment();
             await pages.phoneConfirmationPage.enterUserReservationCode();
             await pages.phoneConfirmationPage.confirmAndGoToPrePayment();
-            await pages.prePaymentPage.enterEmailAddress(userInfo.email);
+            await pages.prePaymentPage.enterEmailAddress();
             await pages.prePaymentPage.goToPaymentMethod();
             await pages.paymentMethodMenu.goToTransferPayment();
             await pages.transferPage.selectIngBankTransfer();
@@ -110,25 +106,25 @@ test.describe('Cash payment', async () => {
             await pages.reservationPage.expectReservationToBeCreated(reservation2date, reservation2.startHour, userInfo.bandName, true, false);
         });
 
-        await test.step('When paymentType is selected, only relevant reservations should be displayed', async() => {
+        await test.step('When paymentType is selected, only relevant reservations should be displayed', async () => {
             await page.goto('#admin');
-            await pages.adminLoginPage.loginTheUser(adminPassword);
-            await pages.adminReservationPage.selectPaymentType('wszystkie');
+            await pages.adminLoginPage.loginTheUser();
+            await pages.adminReservationPage.filters.filterByPaymentType('wszystkie');
             await pages.adminReservationPage.calendar.expectReservationToBeVisible(reservation1date, reservation1.startHour, userInfo.bandName, true);
             await pages.adminReservationPage.calendar.expectReservationToBeVisible(reservation2date, reservation2.startHour, userInfo.bandName, true);
 
-            await pages.adminReservationPage.selectPaymentType('online');
+            await pages.adminReservationPage.filters.filterByPaymentType('online');
             await pages.adminReservationPage.calendar.expectReservationToBeVisible(reservation1date, reservation1.startHour, userInfo.bandName, true);
             await expect(await pages.adminReservationPage.calendar.getPreviewOfReservationElement(reservation2date, reservation2.startHour, userInfo.bandName)).not.toBeVisible();
 
-            await pages.adminReservationPage.selectPaymentType('cash');
+            await pages.adminReservationPage.filters.filterByPaymentType('cash');
             await expect(await pages.adminReservationPage.calendar.getPreviewOfReservationElement(reservation1date, reservation1.startHour, userInfo.bandName)).not.toBeVisible();
             await pages.adminReservationPage.calendar.expectReservationToBeVisible(reservation2date, reservation2.startHour, userInfo.bandName, true);
         });
 
         await test.step('Online-payment reservation should be marked in admin panel as first', async () => {
             await page.reload();
-            await expect(pages.adminReservationPage.firstReservationAdnotation).toBeVisible();
+            await expect(pages.adminReservationPage.filters.firstReservationAdnotation).toBeVisible();
             await pages.adminReservationPage.calendar.expectReservationNotToBeMarkedAsFirst(reservation2date, reservation2.startHour, userInfo.bandName);
             await pages.adminReservationPage.calendar.expectReservationToBeMarkedAsFirst(reservation1date, reservation1.startHour, userInfo.bandName);
         });

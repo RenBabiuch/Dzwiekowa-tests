@@ -12,8 +12,8 @@ export class PrePaymentPagePO {
         return this.page.locator('[name="email"] input');
     }
 
-    public async enterEmailAddress(email: string) {
-        await this.emailAddressInput.fill(email);
+    public async enterEmailAddress(defaultEmail = 'allkaraoke@allkaraoke.party') {
+        await this.emailAddressInput.fill(defaultEmail);
     }
 
     public get paymentButton() {

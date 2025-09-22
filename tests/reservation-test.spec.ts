@@ -28,7 +28,6 @@ const reservationType = {
     records: 'Nagrywka',
 } as const;
 
-// todo - cash test (next reservation)
 const successfulMessage = 'Rezerwacja zapisana pomyślnie. Na podany numer telefonu otrzymasz potwierdzenie, a zaraz przed próbą wyślemy kod do drzwi.';
 const emptyFieldErrorMessage = 'Pole jest wymagane';
 
@@ -40,7 +39,6 @@ test.describe('Reservation tests', async () => {
             bandName: 'Chleb i Kawa',
             date: await pages.reservationPage.getSpecificDate("day after tomorrow"),
             endHour: generated.startHour + 1,
-            email: 'songs999@karaoke.pl',
         } as const;
 
         await test.step('After entering new phone number, cash payment button should disappear and online payment alert should appear', async () => {
@@ -66,11 +64,11 @@ test.describe('Reservation tests', async () => {
             await pages.phoneConfirmationPage.expectEnteredNumberToBeVisible(generated.phoneNum);
             await pages.phoneConfirmationPage.enterUserReservationCode();
             await pages.phoneConfirmationPage.confirmAndGoToPrePayment();
-            await pages.prePaymentPage.enterEmailAddress(reservation.email);
+            await pages.prePaymentPage.enterEmailAddress();
             await pages.prePaymentPage.goToPaymentMethod();
         });
 
-        await test.step('After making the transfer, the reservation should be visible in the calendar', async() => {
+        await test.step('After making the transfer, the reservation should be visible in the calendar', async () => {
             await pages.paymentMethodMenu.goToTransferPayment();
             await pages.transferPage.selectIngBankTransfer();
             await pages.bankPage.goToPay();
@@ -161,10 +159,9 @@ test('Unsuccessful creating a reservation for an already booked date', async () 
         bandName2: 'Band Los_Dos',
         date: await pages.reservationPage.getSpecificDate('tomorrow'),
         endHour: generated.startHour + 2,
-        email: 'hello@world.com',
     } as const;
 
-    let reservationDate = '';
+    let reservationDate: string;
     const roomOccupancyErrorMessage = 'Czas rezerwacji pokrywa się z innymi wpisami.';
 
     await test.step('Book a rehear-room for the first band', async () => {
@@ -175,7 +172,7 @@ test('Unsuccessful creating a reservation for an already booked date', async () 
 
         await pages.phoneConfirmationPage.enterUserReservationCode();
         await pages.phoneConfirmationPage.confirmAndGoToPrePayment();
-        await pages.prePaymentPage.enterEmailAddress(reservation.email);
+        await pages.prePaymentPage.enterEmailAddress();
         await pages.prePaymentPage.goToPaymentMethod();
         await pages.paymentMethodMenu.goToTransferPayment();
         await pages.transferPage.selectIngBankTransfer();

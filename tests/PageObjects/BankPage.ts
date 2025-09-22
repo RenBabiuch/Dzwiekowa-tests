@@ -22,6 +22,6 @@ export class BankPagePO {
             await this.payButton.click();
             // try again if the button doesn't disappear
             await expect(this.payButton).not.toBeVisible({timeout: 2_000});
-        }).toPass({timeout: 10_000})
+        }).toPass({timeout: 15_000})
     }
 }
