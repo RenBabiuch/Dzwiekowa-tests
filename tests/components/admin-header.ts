@@ -31,4 +31,20 @@ export class AdminHeader {
     public async logoutTheUser() {
         await this.logoutButton.click();
     }
+
+    public get manageReservationsButton() {
+        return this.page.getByTestId('manage-reservations');
+    }
+
+    public async goToManageReservations() {
+        await this.manageReservationsButton.click();
+    }
+
+    public get notepadButton() {
+        return this.page.getByTestId('notepad');
+    }
+
+    public async goToNotepad() {
+        await this.notepadButton.click();
+    }
 }
