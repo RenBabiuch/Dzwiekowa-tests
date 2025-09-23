@@ -19,7 +19,7 @@ export class AdminFilters {
     }
 
     public async filterReservationByPhoneNum(number: string) {
-        await this.filterByPhoneNumInput.fill(number)
+        await this.filterByPhoneNumInput.fill(number);
     }
 
     public async filterByPaymentType(paymentType: 'wszystkie' | 'online' | 'cash') {

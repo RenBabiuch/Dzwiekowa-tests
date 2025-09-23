@@ -183,7 +183,7 @@ test('Unsuccessful creating a reservation for an already booked date', async () 
     await test.step('After creating a reservation for the same - already booked - date, an error message should appear', async () => {
         await pages.reservationPage.fillTheFormAndCheckCheckbox(roomsName.num2, reservationType.band, reservation.bandName2, generated.phoneNum, generated.startHour, reservation.endHour, reservation.date);
         await pages.reservationPage.submitWithOnlinePayment();
-        await pages.reservationPage.reservationForm.expectEndDateErrorMessageToBe(roomOccupancyErrorMessage)
+        await pages.reservationPage.reservationForm.expectEndDateErrorMessageToBe(roomOccupancyErrorMessage);
     });
 });
 
