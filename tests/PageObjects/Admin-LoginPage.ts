@@ -16,8 +16,8 @@ export class AdminLoginPagePO {
         return this.page.getByTestId('login-button');
     }
 
-    public async loginTheUser(password: string) {
-        await this.enterUserPassword(password);
+    public async loginTheUser(defaultPassword = '12345') {
+        await this.enterUserPassword(defaultPassword);
         await this.loginButton.click();
     }
 }
