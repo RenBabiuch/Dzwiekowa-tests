@@ -50,7 +50,7 @@ test.describe('Online payments', async () => {
             await pages.transferPage.selectIngBankTransfer();
             await pages.bankPage.expectTransactionAmountToBe(currentReservationPrice);
             await pages.bankPage.goToPay();
-            await pages.reservationPage.expectReservationToBeCreated(reservationDate, reservation.startHour, reservation.bandName, false);
+            await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservationDate, reservation.startHour, reservation.bandName, false);
         });
     });
 });
@@ -82,7 +82,7 @@ test.describe('Cash payment', async () => {
             await pages.reservationPage.fillTheFormAndCheckCheckbox('Browar Miesczanski', 'Solo', userInfo.bandName, userInfo.phoneNum, reservation1.startHour, endHour, reservation1.startDate);
             reservation1date = await pages.reservationPage.reservationForm.getStartDateInputValue();
 
-            await expect(pages.reservationPage.submitWithCashPaymentButton).not.toBeVisible();
+            await expect(pages.reservationPage.reservationForm.submitWithCashPaymentButton).not.toBeVisible();
             await pages.reservationPage.submitWithOnlinePayment();
             await pages.phoneConfirmationPage.enterUserReservationCode();
             await pages.phoneConfirmationPage.confirmAndGoToPrePayment();
@@ -91,7 +91,7 @@ test.describe('Cash payment', async () => {
             await pages.paymentMethodMenu.goToTransferPayment();
             await pages.transferPage.selectIngBankTransfer();
             await pages.bankPage.goToPay();
-            await pages.reservationPage.expectReservationToBeCreated(reservation1date, reservation1.startHour, userInfo.bandName, false, false);
+            await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservation1date, reservation1.startHour, userInfo.bandName, false, false);
         });
 
         await test.step('After creating second reservation for the same user, cash payment should be possible', async () => {
@@ -100,10 +100,10 @@ test.describe('Cash payment', async () => {
             await pages.reservationPage.fillTheFormAndCheckCheckbox('Browar Miesczanski', 'Nagrywka', userInfo.bandName, userInfo.phoneNum, reservation2.startHour, endHour, reservation2.startDate);
             reservation2date = await pages.reservationPage.reservationForm.getStartDateInputValue();
 
-            await expect(pages.reservationPage.submitWithCashPaymentButton).toBeVisible();
-            await pages.reservationPage.submitWithCashPayment();
+            await expect(pages.reservationPage.reservationForm.submitWithCashPaymentButton).toBeVisible();
+            await pages.reservationPage.reservationForm.submitWithCashPayment();
             await expect(pages.reservationPage.reservationForm.successfulReservationAlert).toBeVisible();
-            await pages.reservationPage.expectReservationToBeCreated(reservation2date, reservation2.startHour, userInfo.bandName, true, false);
+            await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservation2date, reservation2.startHour, userInfo.bandName, true, false);
         });
 
         await test.step('When paymentType is selected, only relevant reservations should be displayed', async () => {

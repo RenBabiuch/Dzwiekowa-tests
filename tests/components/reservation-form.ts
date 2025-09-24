@@ -1,15 +1,17 @@
 import {expect, Page} from "@playwright/test";
 import {DateAndTimePicker} from "./date-and-time-picker";
+import {Calendar} from "./calendar";
 
-type roomNameType = 'Wszystkie' | 'Browar Miesczanski' | 'Stary Mlyn' | 'Tęczowa 57';
-type reservationTypeNameType = 'Wybierz...' | 'Zespół' | 'Solo' | 'Nagrywka';
-type dayNameType = 'yesterday' | 'today' | 'tomorrow' | 'day after tomorrow';
+export type roomNameType = 'Wszystkie' | 'Browar Miesczanski' | 'Stary Mlyn' | 'Tęczowa 57';
+export type reservationTypeNameType = 'Wybierz...' | 'Zespół' | 'Solo' | 'Nagrywka';
+export type dayNameType = 'yesterday' | 'today' | 'tomorrow' | 'day after tomorrow';
 
 export class ReservationForm {
     constructor(private page: Page) {
     }
 
     dateAndTimePicker = new DateAndTimePicker(this.page);
+    calendar = new Calendar(this.page);
 
     reservationTypeIdSelector = 'form-reservation-type';
     bandNameFieldSelector = this.page.getByTestId('form-band-name');
@@ -231,5 +233,36 @@ export class ReservationForm {
 
     public async closeSuccessfulReservationAlert() {
         await this.successfulReservationAlert.getByTestId('accept').click();
+    }
+
+    public get submitWithCashPaymentButton() {
+        return this.page.getByTestId('form-submit');
+    }
+
+    public async submitWithCashPayment() {
+        await this.submitWithCashPaymentButton.click();
+    }
+
+    public async getCashReservationPrice() {
+        const getPrice = async () => {
+            const text = await this.submitWithCashPaymentButton.textContent();
+            return text.substring(38, 40);
+        };
+
+        await expect(async () => {
+            const currentPrice = await getPrice();
+            await expect(currentPrice.length).toBeGreaterThan(0);
+        }).toPass();
+
+        return getPrice();
+    }
+
+    public async expectReservationToBeCreated(inputDate: string, startHour: number, bandName: string, successfulAlert = true, adminPanel = false) {
+
+        if (successfulAlert) {
+            // only appears when paying with cash
+            await this.closeSuccessfulReservationAlert();
+        }
+        await this.calendar.expectReservationToBeVisible(inputDate, startHour, bandName, adminPanel);
     }
 }

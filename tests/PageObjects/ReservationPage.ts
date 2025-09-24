@@ -1,9 +1,6 @@
 import {expect, Page} from "@playwright/test";
 import {Calendar} from "../components/calendar";
-import {ReservationForm} from "../components/reservation-form";
-
-type roomNameType = 'Wszystkie' | 'Browar Miesczanski' | 'Stary Mlyn' | 'Tęczowa 57';
-type reservationTypeNameType = 'Wybierz...' | 'Zespół' | 'Solo' | 'Nagrywka';
+import {ReservationForm, reservationTypeNameType, roomNameType} from "../components/reservation-form";
 
 export class ReservationPagePO {
     constructor(private page: Page) {
@@ -50,41 +47,9 @@ export class ReservationPagePO {
         return getPrice();
     }
 
-    public async getCashReservationPrice() {
-
-        const getPrice = async () => {
-            const text = await this.submitWithCashPaymentButton.textContent();
-            return text.substring(38, 40);
-        };
-
-        await expect(async () => {
-            const currentPrice = await getPrice();
-            await expect(currentPrice.length).toBeGreaterThan(0);
-        }).toPass();
-
-        return getPrice();
-    }
-
-    public get submitWithCashPaymentButton() {
-        return this.page.getByTestId('form-submit');
-    }
-
-    public async submitWithCashPayment() {
-        await this.submitWithCashPaymentButton.click();
-    }
-
     public async expectNewUserOnlinePaymentAlertToBe() {
         const message = 'Dla nowych użytkowników dostępna jest wyłącznie płatność online. Po pierwszej odbytej próbie pojawi się opcja płatności gotówką.';
 
         await expect(this.formInputFieldSelector.last()).toContainText(message);
-    }
-
-    public async expectReservationToBeCreated(inputDate: string, startHour: number, bandName: string, successfulAlert = true, adminPanel = false) {
-
-        if (successfulAlert) {
-            // only appears when paying with cash
-            await this.reservationForm.closeSuccessfulReservationAlert();
-        }
-        await this.calendar.expectReservationToBeVisible(inputDate, startHour, bandName, adminPanel);
     }
 }

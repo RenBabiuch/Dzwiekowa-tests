@@ -36,7 +36,7 @@ test('Reservation with correct data is visible in the admin panel and can be can
         await pages.paymentMethodMenu.goToTransferPayment();
         await pages.transferPage.selectIngBankTransfer();
         await pages.bankPage.goToPay();
-        await pages.reservationPage.expectReservationToBeCreated(reservationDate, reservation.startHour, reservation.bandName, false, false);
+        await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservationDate, reservation.startHour, reservation.bandName, false, false);
     });
 
     await test.step('After login to admin panel, reservation should be visible as well', async() => {
@@ -44,7 +44,7 @@ test('Reservation with correct data is visible in the admin panel and can be can
         await page.reload();
         await pages.adminLoginPage.loginTheUser();
         await expect(pages.adminReservationPage.calendarElement).toBeVisible();
-        await pages.reservationPage.expectReservationToBeCreated(reservationDate, reservation.startHour, reservation.bandName, false, true);
+        await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservationDate, reservation.startHour, reservation.bandName, false, true);
     });
 
     await test.step('After clicking on the reservation window, its details with correct data should appear', async() => {
