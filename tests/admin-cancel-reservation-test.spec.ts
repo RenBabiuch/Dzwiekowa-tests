@@ -11,9 +11,9 @@ test.beforeEach(async ({page}) => {
 test('Reservation with correct data is visible in the admin panel and can be canceled with refund', async ({page}) => {
     const reservation = {
         bandName: 'Harry Potty',
-        phone: await pages.reservationPage.generateRandomPhoneNumber(),
-        date: await pages.reservationPage.getSpecificDate('day after tomorrow'),
-        startHour: await pages.reservationPage.generateRandomHour(),
+        phone: await pages.reservationPage.reservationForm.generateRandomPhoneNumber(),
+        date: await pages.reservationPage.reservationForm.getSpecificDate('day after tomorrow'),
+        startHour: await pages.reservationPage.reservationForm.generateRandomHour(),
         paymentMethod: 'Online',
     } as const;
 
@@ -23,9 +23,9 @@ test('Reservation with correct data is visible in the admin panel and can be can
     let currentPrice;
 
        await test.step('Create a valid reservation in user`s view - it should be visible in calendar', async() => {
-        await pages.reservationPage.fillTheReservationForm('Browar Miesczanski', 'Zespół', reservation.bandName, reservation.phone, reservation.startHour, endHour, reservation.date);
+        await pages.reservationPage.fillTheFormAndCheckCheckbox('Browar Miesczanski', 'Zespół', reservation.bandName, reservation.phone, reservation.startHour, endHour, reservation.date);
 
-        reservationDate = await pages.reservationPage.getStartDateInputValue();
+        reservationDate = await pages.reservationPage.reservationForm.getStartDateInputValue();
         currentPrice = await pages.reservationPage.getOnlineReservationPrice();
 
         await pages.reservationPage.submitWithOnlinePayment();
@@ -36,7 +36,7 @@ test('Reservation with correct data is visible in the admin panel and can be can
         await pages.paymentMethodMenu.goToTransferPayment();
         await pages.transferPage.selectIngBankTransfer();
         await pages.bankPage.goToPay();
-        await pages.reservationPage.expectReservationToBeCreated(reservationDate, reservation.startHour, reservation.bandName, false, false);
+        await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservationDate, reservation.startHour, reservation.bandName, false, false);
     });
 
     await test.step('After login to admin panel, reservation should be visible as well', async() => {
@@ -44,7 +44,7 @@ test('Reservation with correct data is visible in the admin panel and can be can
         await page.reload();
         await pages.adminLoginPage.loginTheUser();
         await expect(pages.adminReservationPage.calendarElement).toBeVisible();
-        await pages.reservationPage.expectReservationToBeCreated(reservationDate, reservation.startHour, reservation.bandName, false, true);
+        await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservationDate, reservation.startHour, reservation.bandName, false, true);
     });
 
     await test.step('After clicking on the reservation window, its details with correct data should appear', async() => {

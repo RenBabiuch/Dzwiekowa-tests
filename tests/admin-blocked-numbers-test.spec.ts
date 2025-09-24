@@ -8,8 +8,8 @@ test.beforeEach(async ({page}) => {
 
      reservation = {
         bandName: 'Timanfaya',
-        date: await pages.reservationPage.getSpecificDate('tomorrow'),
-        startHour: await pages.reservationPage.generateRandomHour(),
+        date: await pages.reservationPage.reservationForm.getSpecificDate('tomorrow'),
+        startHour: await pages.reservationPage.reservationForm.generateRandomHour(),
     } as const;
 
 });
@@ -25,9 +25,9 @@ test('Complete blocking phone numbers works', async({page}) => {
 
     await test.step('Go to create first reservation', async() => {
         await page.goto('');
-        await pages.reservationPage.fillTheReservationForm('Browar Miesczanski', 'Zespół', reservation.bandName, blockedNumber, reservation.startHour, endHour, reservation.date);
+        await pages.reservationPage.fillTheFormAndCheckCheckbox('Browar Miesczanski', 'Zespół', reservation.bandName, blockedNumber, reservation.startHour, endHour, reservation.date);
 
-        let reservationDate = await pages.reservationPage.getStartDateInputValue();
+        let reservationDate = await pages.reservationPage.reservationForm.getStartDateInputValue();
 
         await pages.reservationPage.submitWithOnlinePayment();
         await pages.phoneConfirmationPage.enterUserReservationCode();
@@ -37,7 +37,7 @@ test('Complete blocking phone numbers works', async({page}) => {
         await pages.paymentMethodMenu.goToTransferPayment();
         await pages.transferPage.selectIngBankTransfer();
         await pages.bankPage.goToPay();
-        await pages.reservationPage.expectReservationToBeCreated(reservationDate, reservation.startHour, reservation.bandName, false, false);
+        await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservationDate, reservation.startHour, reservation.bandName, false, false);
     });
 
     await test.step('Go to block the phone number of the problematic user', async() => {
@@ -55,9 +55,9 @@ test('Complete blocking phone numbers works', async({page}) => {
     await test.step('Go to create reservation with blocked number - the phone number error message should appear', async() => {
         await page.goto('');
         await page.reload();
-        await pages.reservationPage.fillTheReservationForm('Browar Miesczanski', 'Zespół', reservation.bandName, blockedNumber, reservationNewStartHour, reservationNewEndHour, reservation.date);
+        await pages.reservationPage.fillTheFormAndCheckCheckbox('Browar Miesczanski', 'Zespół', reservation.bandName, blockedNumber, reservationNewStartHour, reservationNewEndHour, reservation.date);
         await pages.reservationPage.submitWithOnlinePayment();
-        await pages.reservationPage.expectPhoneNumErrorMessageToBe(phoneNumErrorMessage);
+        await pages.reservationPage.reservationForm.expectPhoneNumErrorMessageToBe(phoneNumErrorMessage);
     });
 
     await test.step('After unblocking the number, it should be possible to create a reservation', async() => {
@@ -70,9 +70,9 @@ test('Complete blocking phone numbers works', async({page}) => {
 
         await page.goto('');
         await page.reload();
-        await pages.reservationPage.fillTheReservationForm('Browar Miesczanski', 'Zespół', reservation.bandName, blockedNumber, reservationNewStartHour, reservationNewEndHour, reservation.date);
+        await pages.reservationPage.fillTheFormAndCheckCheckbox('Browar Miesczanski', 'Zespół', reservation.bandName, blockedNumber, reservationNewStartHour, reservationNewEndHour, reservation.date);
 
-        let reservationNewDate = await pages.reservationPage.getStartDateInputValue();
+        let reservationNewDate = await pages.reservationPage.reservationForm.getStartDateInputValue();
 
         await pages.reservationPage.submitWithOnlinePayment();
         await pages.prePaymentPage.enterEmailAddress();
@@ -80,6 +80,6 @@ test('Complete blocking phone numbers works', async({page}) => {
         await pages.paymentMethodMenu.goToTransferPayment();
         await pages.transferPage.selectIngBankTransfer();
         await pages.bankPage.goToPay();
-        await pages.reservationPage.expectReservationToBeCreated(reservationNewDate, reservationNewStartHour, reservation.bandName, false, false);
+        await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservationNewDate, reservationNewStartHour, reservation.bandName, false, false);
     });
 });
