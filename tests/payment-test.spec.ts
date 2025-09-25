@@ -58,6 +58,7 @@ test.describe('Online payments', async () => {
 test.describe('Cash payment', async () => {
     test('Successful cash payment, when first online reservation was not cancelled', async ({page}) => {
 
+        test.slow();
         const userInfo = {
             bandName: 'Hey_Dudes',
             phoneNum: await pages.reservationPage.reservationForm.generateRandomPhoneNumber(),

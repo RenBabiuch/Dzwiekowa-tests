@@ -46,7 +46,7 @@ test('Complete blocking phone numbers works', async({page}) => {
         await pages.adminReservationPage.adminHeader.goToBlockNumbers();
         await pages.adminBlockedNumbersPage.fillAndConfirmBlockNumberForm(blockedNumber, 'blocked', reasonForBlocking);
         await expect(pages.adminBlockedNumbersPage.blockedNumbersContainer).toBeVisible();
-        await expect(await pages.adminBlockedNumbersPage.blockedNumberElement(blockedNumber)).toBeVisible();
+        await expect(await pages.adminBlockedNumbersPage.getBlockedNumberElement(blockedNumber)).toBeVisible();
     });
 
         const reservationNewStartHour = reservation.startHour + 3;
@@ -64,9 +64,9 @@ test('Complete blocking phone numbers works', async({page}) => {
         await page.goto('#admin');
         await page.reload();
         await pages.adminReservationPage.adminHeader.goToBlockNumbers();
-        await expect(await pages.adminBlockedNumbersPage.blockedNumberElement(blockedNumber)).toBeVisible();
+        await expect(await pages.adminBlockedNumbersPage.getBlockedNumberElement(blockedNumber)).toBeVisible();
         await pages.adminBlockedNumbersPage.unlockPhoneNumber(blockedNumber);
-        await expect(await pages.adminBlockedNumbersPage.blockedNumberElement(blockedNumber)).not.toBeVisible();
+        await expect(await pages.adminBlockedNumbersPage.getBlockedNumberElement(blockedNumber)).not.toBeVisible();
 
         await page.goto('');
         await page.reload();
