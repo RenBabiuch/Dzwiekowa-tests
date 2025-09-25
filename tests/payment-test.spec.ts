@@ -12,22 +12,22 @@ test.describe('Online payments', async () => {
     test('Successful online payment', async () => {
         const reservation = {
             bandName: 'Mars&Stones',
-            phone: await pages.reservationPage.generateRandomPhoneNumber(),
-            date: await pages.reservationPage.getSpecificDate('day after tomorrow'),
-            startHour: await pages.reservationPage.generateRandomHour(),
+            phone: await pages.reservationPage.reservationForm.generateRandomPhoneNumber(),
+            date: await pages.reservationPage.reservationForm.getSpecificDate('day after tomorrow'),
+            startHour: await pages.reservationPage.reservationForm.generateRandomHour(),
         } as const;
         const endHour = reservation.startHour + 2;
 
         await test.step('Fill the reservation form with correct data', async () => {
-            await pages.reservationPage.selectRehearsalRoom('Stary Mlyn');
-            await pages.reservationPage.selectReservationType('Nagrywka');
-            await pages.reservationPage.enterBandName(reservation.bandName);
-            await pages.reservationPage.enterPhoneNumber(reservation.phone);
-            await pages.reservationPage.enterDatesAndTime(reservation.date, reservation.startHour, endHour);
+            await pages.reservationPage.reservationForm.selectRehearsalRoom('Stary Mlyn');
+            await pages.reservationPage.reservationForm.selectReservationType('Nagrywka');
+            await pages.reservationPage.reservationForm.enterBandName(reservation.bandName);
+            await pages.reservationPage.reservationForm.enterPhoneNumber(reservation.phone);
+            await pages.reservationPage.reservationForm.enterDatesAndTime(reservation.date, reservation.startHour, endHour);
             await pages.reservationPage.selectAgreementCheckbox();
         });
 
-        const reservationDate = await pages.reservationPage.getStartDateInputValue();
+        const reservationDate = await pages.reservationPage.reservationForm.getStartDateInputValue();
         const currentReservationPrice = await pages.reservationPage.getOnlineReservationPrice();
 
         await test.step('Go to online payment and enter reservation code', async () => {
@@ -50,7 +50,7 @@ test.describe('Online payments', async () => {
             await pages.transferPage.selectIngBankTransfer();
             await pages.bankPage.expectTransactionAmountToBe(currentReservationPrice);
             await pages.bankPage.goToPay();
-            await pages.reservationPage.expectReservationToBeCreated(reservationDate, reservation.startHour, reservation.bandName, false);
+            await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservationDate, reservation.startHour, reservation.bandName, false);
         });
     });
 });
@@ -61,17 +61,17 @@ test.describe('Cash payment', async () => {
         test.slow();
         const userInfo = {
             bandName: 'Hey_Dudes',
-            phoneNum: await pages.reservationPage.generateRandomPhoneNumber(),
+            phoneNum: await pages.reservationPage.reservationForm.generateRandomPhoneNumber(),
         } as const;
 
         const reservation1 = {
-            startDate: await pages.reservationPage.getSpecificDate('today'),
-            startHour: await pages.reservationPage.getNextHour(),
+            startDate: await pages.reservationPage.reservationForm.getSpecificDate('today'),
+            startHour: await pages.reservationPage.reservationForm.getNextHour(),
         } as const;
 
         const reservation2 = {
-            startDate: await pages.reservationPage.getSpecificDate('tomorrow'),
-            startHour: await pages.reservationPage.generateRandomHour(),
+            startDate: await pages.reservationPage.reservationForm.getSpecificDate('tomorrow'),
+            startHour: await pages.reservationPage.reservationForm.generateRandomHour(),
         } as const;
 
         let reservation1date;
@@ -80,10 +80,10 @@ test.describe('Cash payment', async () => {
         await test.step('Create online-payment reservation starting in an hour - the user won`t be able to cancel already', async () => {
             const endHour = reservation1.startHour + 2;
 
-            await pages.reservationPage.fillTheReservationForm('Browar Miesczanski', 'Solo', userInfo.bandName, userInfo.phoneNum, reservation1.startHour, endHour, reservation1.startDate);
-            reservation1date = await pages.reservationPage.getStartDateInputValue();
+            await pages.reservationPage.fillTheFormAndCheckCheckbox('Browar Miesczanski', 'Solo', userInfo.bandName, userInfo.phoneNum, reservation1.startHour, endHour, reservation1.startDate);
+            reservation1date = await pages.reservationPage.reservationForm.getStartDateInputValue();
 
-            await expect(pages.reservationPage.submitWithCashPaymentButton).not.toBeVisible();
+            await expect(pages.reservationPage.reservationForm.submitWithCashPaymentButton).not.toBeVisible();
             await pages.reservationPage.submitWithOnlinePayment();
             await pages.phoneConfirmationPage.enterUserReservationCode();
             await pages.phoneConfirmationPage.confirmAndGoToPrePayment();
@@ -92,19 +92,19 @@ test.describe('Cash payment', async () => {
             await pages.paymentMethodMenu.goToTransferPayment();
             await pages.transferPage.selectIngBankTransfer();
             await pages.bankPage.goToPay();
-            await pages.reservationPage.expectReservationToBeCreated(reservation1date, reservation1.startHour, userInfo.bandName, false, false);
+            await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservation1date, reservation1.startHour, userInfo.bandName, false, false);
         });
 
         await test.step('After creating second reservation for the same user, cash payment should be possible', async () => {
             const endHour = reservation2.startHour + 2;
 
-            await pages.reservationPage.fillTheReservationForm('Browar Miesczanski', 'Nagrywka', userInfo.bandName, userInfo.phoneNum, reservation2.startHour, endHour, reservation2.startDate);
-            reservation2date = await pages.reservationPage.getStartDateInputValue();
+            await pages.reservationPage.fillTheFormAndCheckCheckbox('Browar Miesczanski', 'Nagrywka', userInfo.bandName, userInfo.phoneNum, reservation2.startHour, endHour, reservation2.startDate);
+            reservation2date = await pages.reservationPage.reservationForm.getStartDateInputValue();
 
-            await expect(pages.reservationPage.submitWithCashPaymentButton).toBeVisible();
-            await pages.reservationPage.submitWithCashPayment();
-            await expect(pages.reservationPage.successfulReservationAlert).toBeVisible();
-            await pages.reservationPage.expectReservationToBeCreated(reservation2date, reservation2.startHour, userInfo.bandName, true, false);
+            await expect(pages.reservationPage.reservationForm.submitWithCashPaymentButton).toBeVisible();
+            await pages.reservationPage.reservationForm.submitWithCashPayment();
+            await expect(pages.reservationPage.reservationForm.successfulReservationAlert).toBeVisible();
+            await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservation2date, reservation2.startHour, userInfo.bandName, true, false);
         });
 
         await test.step('When paymentType is selected, only relevant reservations should be displayed', async () => {
