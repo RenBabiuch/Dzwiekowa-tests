@@ -45,11 +45,11 @@ test.describe('Reservation tests', async () => {
             await pages.reservationPage.reservationForm.selectRehearsalRoom(roomsName.num2);
             await pages.reservationPage.reservationForm.selectReservationType(reservationType.band);
             await pages.reservationPage.reservationForm.enterBandName(reservation.bandName);
-            await expect(pages.reservationPage.submitWithCashPaymentButton).toBeVisible();
+            await expect(pages.reservationPage.reservationForm.submitWithCashPaymentButton).toBeVisible();
             await pages.reservationPage.reservationForm.enterPhoneNumber(generated.phoneNum);
             await pages.reservationPage.reservationForm.enterDatesAndTime(reservation.date, generated.startHour, reservation.endHour);
             await pages.reservationPage.reservationForm.expectSelectedTimeToBe(generated.startHour, reservation.endHour);
-            await expect(pages.reservationPage.submitWithCashPaymentButton).not.toBeVisible();
+            await expect(pages.reservationPage.reservationForm.submitWithCashPaymentButton).not.toBeVisible();
             await pages.reservationPage.expectNewUserOnlinePaymentAlertToBe();
         });
 
@@ -72,7 +72,7 @@ test.describe('Reservation tests', async () => {
             await pages.paymentMethodMenu.goToTransferPayment();
             await pages.transferPage.selectIngBankTransfer();
             await pages.bankPage.goToPay();
-            await pages.reservationPage.expectReservationToBeCreated(reservationDate, generated.startHour, reservation.bandName, false);
+            await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservationDate, generated.startHour, reservation.bandName, false);
         });
     });
 });
@@ -177,7 +177,7 @@ test('Unsuccessful creating a reservation for an already booked date', async () 
         await pages.paymentMethodMenu.goToTransferPayment();
         await pages.transferPage.selectIngBankTransfer();
         await pages.bankPage.goToPay();
-        await pages.reservationPage.expectReservationToBeCreated(reservationDate, generated.startHour, reservation.bandName1, false);
+        await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservationDate, generated.startHour, reservation.bandName1, false);
     });
 
     await test.step('After creating a reservation for the same - already booked - date, an error message should appear', async () => {
@@ -207,7 +207,7 @@ test('Unsuccessful reservation when no room is selected', async () => {
         await pages.reservationPage.reservationForm.enterPhoneNumber(generated.phoneNum);
         await pages.reservationPage.reservationForm.enterDatesAndTime(reservation.date, generated.startHour, reservation.endHour);
         await pages.reservationPage.selectAgreementCheckbox();
-        await pages.reservationPage.submitWithCashPayment();
+        await pages.reservationPage.reservationForm.submitWithCashPayment();
     });
 
     await test.step('Unsuccessful reservation - both validation messages should be visible', async () => {
@@ -276,7 +276,7 @@ test('Unsuccessful reservation when no phone number is entered', async () => {
         await expect(pages.reservationPage.reservationForm.phoneNumberInput).toBeEmpty();
         await pages.reservationPage.reservationForm.enterDatesAndTime(reservation.date, generated.startHour, reservation.endHour);
         await pages.reservationPage.selectAgreementCheckbox();
-        await pages.reservationPage.submitWithCashPayment();
+        await pages.reservationPage.reservationForm.submitWithCashPayment();
     });
 
     await test.step('Unsuccessful reservation - phone num validation message should be visible', async () => {
@@ -300,7 +300,7 @@ test('Unsuccessful reservation when no end date is entered', async () => {
         await pages.reservationPage.reservationForm.enterStartDate(reservation.date);
         await pages.reservationPage.reservationForm.enterStartTime(generated.startHour);
         await pages.reservationPage.selectAgreementCheckbox();
-        await pages.reservationPage.submitWithCashPayment();
+        await pages.reservationPage.reservationForm.submitWithCashPayment();
     });
 
     await test.step('Unsuccessful reservation - date validation message should be visible', async () => {
@@ -326,7 +326,7 @@ test('Unsuccessful reservation when agreement checkbox is not checked', async ()
 
     await test.step('After sending the form without agreement checked, the form should still be visible with the entered data', async () => {
         await expect(pages.reservationPage.agreementCheckbox).not.toBeChecked();
-        await pages.reservationPage.submitWithCashPayment();
+        await pages.reservationPage.reservationForm.submitWithCashPayment();
         await expect(pages.reservationPage.reservationForm.reservationFormElement).toBeInViewport();
         await expect(pages.reservationPage.reservationForm.bandNameInput).toHaveValue(reservation.bandName);
     });

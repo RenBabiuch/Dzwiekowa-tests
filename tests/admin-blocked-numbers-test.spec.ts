@@ -37,7 +37,7 @@ test('Complete blocking phone numbers works', async({page}) => {
         await pages.paymentMethodMenu.goToTransferPayment();
         await pages.transferPage.selectIngBankTransfer();
         await pages.bankPage.goToPay();
-        await pages.reservationPage.expectReservationToBeCreated(reservationDate, reservation.startHour, reservation.bandName, false, false);
+        await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservationDate, reservation.startHour, reservation.bandName, false, false);
     });
 
     await test.step('Go to block the phone number of the problematic user', async() => {
@@ -80,6 +80,6 @@ test('Complete blocking phone numbers works', async({page}) => {
         await pages.paymentMethodMenu.goToTransferPayment();
         await pages.transferPage.selectIngBankTransfer();
         await pages.bankPage.goToPay();
-        await pages.reservationPage.expectReservationToBeCreated(reservationNewDate, reservationNewStartHour, reservation.bandName, false, false);
+        await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservationNewDate, reservationNewStartHour, reservation.bandName, false, false);
     });
 });
