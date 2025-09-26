@@ -23,7 +23,6 @@ export class AdminCheckboxes {
     }
 
     public async isCheckboxChecked(checkboxName: Locator) {
-
         const checkedCheckboxClassIsVisible = await this.getCheckboxElement(checkboxName).locator(this.checkedCheckboxClass).isVisible();
         if (checkedCheckboxClassIsVisible) {
             return true;
