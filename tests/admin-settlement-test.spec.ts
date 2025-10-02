@@ -31,8 +31,8 @@ test('Calculate-reservation-cost checkbox works', async({page}) => {
         startDate = await pages.adminReservationPage.reservationForm.getStartDateInputValue();
         await pages.adminReservationPage.expectCheckboxElementToBeVisible('calculateReservationCost');
         await pages.adminReservationPage.ensureCheckboxIsUnchecked('calculateReservationCost');
-        await pages.adminReservationPage.submitWithCashPayment();
-        await pages.adminReservationPage.expectReservationToBeCreated(startDate, userInfo.startHour, userInfo.bandName);
+        await pages.adminReservationPage.reservationForm.submitWithCashPayment();
+        await pages.adminReservationPage.reservationForm.expectReservationToBeCreated(startDate, userInfo.startHour, userInfo.bandName, true, true);
     });
 
     await test.step('Reservation cost should be = 0zł and visible in reservation details view', async() => {
@@ -61,5 +61,9 @@ test('Calculate-reservation-cost checkbox works', async({page}) => {
         await expect(pages.adminSettlementPage.getRoomSettlementElement('Młyn')).toBeVisible();
         await pages.adminSettlementPage.expectMonthlyBandSettlementToHaveValue('Młyn', 'Gotówka', 'Zapłacone: ', reservationCost);
         await pages.adminSettlementPage.expectMonthlyBandSettlementToHaveValue('Młyn', 'Gotówka', 'Do zapłaty: ', reservationCost);
+
+        await expect(pages.adminSettlementPage.getRoomSettlementElement('Całość')).toBeVisible();
+        await pages.adminSettlementPage.expectMonthlyBandSettlementToHaveValue('Całość', 'Gotówka', 'Zapłacone: ', reservationCost);
+        await pages.adminSettlementPage.expectMonthlyBandSettlementToHaveValue('Całość', 'Gotówka', 'Do zapłaty: ', reservationCost);
     });
 });

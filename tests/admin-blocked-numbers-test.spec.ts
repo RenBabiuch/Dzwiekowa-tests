@@ -19,7 +19,7 @@ test('Complete blocking phone numbers works', async({page}) => {
     const reasonForBlocking = 'Zniszczenie instrumentów';
     const phoneNumErrorMessage = 'Ten numer ma zablokowaną opcję dodawania rezerwacji. Skontaktuj się z nami w celu wyjaśnienia sprawy';
     const endHour =  reservation.startHour + 2;
-    const blockedNumber = '579823433';
+    const blockedNumber = '579825437';
 
     test.slow();
 
@@ -37,7 +37,7 @@ test('Complete blocking phone numbers works', async({page}) => {
         await pages.paymentMethodMenu.goToTransferPayment();
         await pages.transferPage.selectIngBankTransfer();
         await pages.bankPage.goToPay();
-        await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservationDate, reservation.startHour, reservation.bandName, false, false);
+        await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservationDate, reservation.startHour, reservation.bandName);
     });
 
     await test.step('Go to block the phone number of the problematic user', async() => {
@@ -80,6 +80,6 @@ test('Complete blocking phone numbers works', async({page}) => {
         await pages.paymentMethodMenu.goToTransferPayment();
         await pages.transferPage.selectIngBankTransfer();
         await pages.bankPage.goToPay();
-        await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservationNewDate, reservationNewStartHour, reservation.bandName, false, false);
+        await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservationNewDate, reservationNewStartHour, reservation.bandName);
     });
 });

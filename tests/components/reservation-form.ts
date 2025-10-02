@@ -132,7 +132,7 @@ export class ReservationForm {
     public async enterStartDate(day: Date) {
         await this.clickToSelectStartDateAndTime();
         await this.dateAndTimePicker.selectDay(day);
-        await this.dateAndTimePicker.accept();
+        await this.dateAndTimePicker.clickToAccept();
     }
 
     public async expectStartDateErrorMessageToBe(errorMessage: string) {
@@ -146,7 +146,7 @@ export class ReservationForm {
     public async enterEndDate(day: Date) {
         await this.clickToSelectEndDateAndTime();
         await this.dateAndTimePicker.selectDay(day);
-        await this.dateAndTimePicker.accept();
+        await this.dateAndTimePicker.clickToAccept();
     }
 
     public async expectEndDateErrorMessageToBe(errorMessage: string) {
@@ -156,13 +156,13 @@ export class ReservationForm {
     public async enterStartTime(hour: number) {
         await this.clickToSelectStartDateAndTime();
         await this.dateAndTimePicker.selectTime(hour);
-        await this.dateAndTimePicker.accept();
+        await this.dateAndTimePicker.clickToAccept();
     }
 
     public async enterEndTime(hour: number) {
         await this.clickToSelectEndDateAndTime();
         await this.dateAndTimePicker.selectTime(hour);
-        await this.dateAndTimePicker.accept();
+        await this.dateAndTimePicker.clickToAccept();
     }
 
     public async enterDatesAndTime(startDay: Date, startHour: number, endHour: number, endDay?: Date) {
@@ -257,7 +257,7 @@ export class ReservationForm {
         return getPrice();
     }
 
-    public async expectReservationToBeCreated(inputDate: string, startHour: number, bandName: string, successfulAlert = true, adminPanel = false) {
+    public async expectReservationToBeCreated(inputDate: string, startHour: number, bandName: string, successfulAlert = false, adminPanel = false) {
 
         if (successfulAlert) {
             // only appears when paying with cash
