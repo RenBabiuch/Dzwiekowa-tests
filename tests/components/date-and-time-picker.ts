@@ -4,10 +4,23 @@ export class DateAndTimePicker {
     constructor(private page: Page) {
     }
 
+    public get currentMonthLocator() {
+        return this.page.locator('.MuiPickersCalendarHeader-label');
+    }
+
+    public get nextMonthButton() {
+        return this.page.getByLabel('Next month');
+    }
+
+    public getDayElement(day: Date) {
+        const targetDay = day.getDate();
+        return this.page.getByRole('gridcell', {name: `${targetDay}`, exact: true});
+    }
+
     public async selectDay(day: Date) {
 
-        const monthAndYearInCalendar = await this.page.locator('.MuiPickersCalendarHeader-label').first().textContent();
-        const monthInCalendar = monthAndYearInCalendar.slice(0, -5);
+        const currentMonthAndYearInCalendar = await this.currentMonthLocator.textContent();
+        const currentMonthInCalendar = currentMonthAndYearInCalendar.slice(0, -5);
 
         const numbToMonthsMap = {
             0: 'styczeń',
@@ -24,16 +37,17 @@ export class DateAndTimePicker {
             11: 'grudzień'
         }
 
-        const targetDay = day.getDate();
         const targetMonth = day.getMonth();
 
-        if(monthInCalendar === numbToMonthsMap[targetMonth]) {
-            await expect(this.page.getByText(numbToMonthsMap[targetMonth])).toBeVisible();
-            await this.page.getByRole('gridcell', {name: `${targetDay}`, exact: true}).click();
+        if(currentMonthInCalendar === numbToMonthsMap[targetMonth]) {
+            await expect(this.currentMonthLocator).toContainText(numbToMonthsMap[targetMonth]);
+            await this.getDayElement(day).click();
         } else {
-            await this.page.keyboard.press('ArrowRight');
-            await expect(this.page.getByText(numbToMonthsMap[targetMonth])).toBeVisible();
-            await this.page.getByRole('gridcell', {name: `${targetDay}`, exact: true}).click();
+            await expect(this.nextMonthButton).toBeVisible();
+            await this.nextMonthButton.click();
+            await expect(this.currentMonthLocator).not.toContainText(`${currentMonthInCalendar}`);
+            await expect(this.currentMonthLocator).toContainText(`${numbToMonthsMap[targetMonth]}`);
+            await this.getDayElement(day).click();
         }
     }
 
@@ -44,15 +58,15 @@ export class DateAndTimePicker {
     public async selectAndApproveDayAndTime(day: Date, hour: number) {
         await this.selectDay(day);
         await this.selectTime(hour);
-        await this.accept();
+        await this.clickToAccept();
         await expect(this.page.locator('.MuiDateCalendar-root')).not.toBeVisible();
     }
 
-    public async cancel() {
+    public async clickToCancel() {
         await this.page.getByRole('button', {name: 'Cancel'}).click();
     }
 
-    public async accept() {
+    public async clickToAccept() {
         await this.page.getByRole('button', {name: 'OK'}).click();
     }
 }

@@ -11,6 +11,7 @@ import {AdminManageRoomsPagePO} from "./Admin-ManageRoomsPage";
 import {AdminReservationDetailsPagePO} from "./Admin-ReservationDetailsPage";
 import {AdminBlockedNumbersPagePO} from "./Admin-BlockedNumbersPage";
 import {AdminNotepadPagePO} from "./Admin-NotepadPage";
+import {AdminSettlementPagePO} from "./Admin-SettlementPage";
 
 export default function initialise(page: Page) {
     return {
@@ -26,5 +27,6 @@ export default function initialise(page: Page) {
         adminReservationDetailsPage: new AdminReservationDetailsPagePO(page),
         adminBlockedNumbersPage: new AdminBlockedNumbersPagePO(page),
         adminNotepadPage: new AdminNotepadPagePO(page),
+        adminSettlementPage: new AdminSettlementPagePO(page,)
     }
 }

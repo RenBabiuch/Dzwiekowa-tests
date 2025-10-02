@@ -50,7 +50,7 @@ test.describe('Online payments', async () => {
             await pages.transferPage.selectIngBankTransfer();
             await pages.bankPage.expectTransactionAmountToBe(currentReservationPrice);
             await pages.bankPage.goToPay();
-            await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservationDate, reservation.startHour, reservation.bandName, false);
+            await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservationDate, reservation.startHour, reservation.bandName);
         });
     });
 });
@@ -91,7 +91,7 @@ test.describe('Cash payment', async () => {
             await pages.paymentMethodMenu.goToTransferPayment();
             await pages.transferPage.selectIngBankTransfer();
             await pages.bankPage.goToPay();
-            await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservation1date, reservation1.startHour, userInfo.bandName, false, false);
+            await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservation1date, reservation1.startHour, userInfo.bandName);
         });
 
         await test.step('After creating second reservation for the same user, cash payment should be possible', async () => {
