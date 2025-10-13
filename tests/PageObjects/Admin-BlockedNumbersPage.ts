@@ -55,12 +55,24 @@ export class AdminBlockedNumbersPagePO {
         return this.page.getByText('Obecnie zablokowane numery');
     }
 
+    public getFormatPhoneNumberIfNeeded(phoneNumber: string) {
+
+        if(phoneNumber.includes(' ')) {
+            // @ts-ignore
+            return phoneNumber.replaceAll(' ', '');
+        } else {
+            return phoneNumber;
+        }
+    }
+
     public getBlockedNumberElement(phoneNumber: string) {
-        return this.page.getByTestId(`blocked-row-+48${phoneNumber}`);
+        const newFormatNumber = this.getFormatPhoneNumberIfNeeded(phoneNumber);
+        return this.page.getByTestId(`blocked-row-+48${newFormatNumber}`);
     }
 
     public unlockNumberButton(phoneNumber: string) {
-        return this.page.getByTestId(`unblock-+48${phoneNumber}`);
+        const newFormatNumber = this.getFormatPhoneNumberIfNeeded(phoneNumber);
+        return this.page.getByTestId(`unblock-+48${newFormatNumber}`);
     }
 
     public async unlockPhoneNumber(phoneNumber: string) {
@@ -83,17 +95,10 @@ export class AdminBlockedNumbersPagePO {
 
         await expect(this.getReservationDetailsOfBlockedNumberElement(phoneNumber).getByText(`${day}/${month}/${year}`)).toBeVisible();
 
-        if (String(startHour).length === 1) {
-            await expect(this.getReservationDetailsOfBlockedNumberElement(phoneNumber).getByText(`0${startHour}:00-`)).toBeVisible();
-        } else {
-            await expect(this.getReservationDetailsOfBlockedNumberElement(phoneNumber).getByText(`${startHour}:00-`)).toBeVisible();
-        }
+        const formattedStartHour = String(startHour).padStart(2,'0');
+        const formattedEndHour = String(endHour).padStart(2,'0');
 
-        if (String(endHour).length === 1) {
-            await expect(this.getReservationDetailsOfBlockedNumberElement(phoneNumber).getByText(`-0${endHour}:00`)).toBeVisible();
-        } else {
-            await expect(this.getReservationDetailsOfBlockedNumberElement(phoneNumber).getByText(`-${endHour}:00`)).toBeVisible();
-        }
+        await expect(this.getReservationDetailsOfBlockedNumberElement(phoneNumber).getByText(`${formattedStartHour}:00-${formattedEndHour}:00`)).toBeVisible();
     }
 
     public async expectReservationPriceOfBlockedNumberToBeVisible(phoneNumber: string, price: string) {
