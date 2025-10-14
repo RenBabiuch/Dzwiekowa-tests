@@ -10,7 +10,7 @@ test.beforeEach(async ({page}) => {
 
     const phoneNumErrorMessage = 'Ten numer ma zablokowaną opcję dodawania rezerwacji. Skontaktuj się z nami w celu wyjaśnienia sprawy';
 
-test('Blocking phone numbers from the Block-Number Page - works', async({page}) => {
+test('Blocking phone number from the Block-Number Page - works', async() => {
 
     const reservation = {
         bandName: 'Timanfaya',
@@ -45,13 +45,13 @@ test('Blocking phone numbers from the Block-Number Page - works', async({page}) 
         await pages.adminLoginPage.goToAdminPanel();
         await pages.adminLoginPage.loginTheUser();
         await pages.adminReservationPage.adminHeader.goToBlockNumbers();
-        await pages.adminBlockedNumbersPage.fillAndConfirmBlockNumberForm(reservation.phoneNumber, 'blocked', reasonForBlocking);
+        await pages.adminBlockedNumbersPage.fillAndConfirmBlockNumberForm(reservation.phoneNumber, 'Zablokowany', reasonForBlocking);
         await expect(pages.adminBlockedNumbersPage.blockedNumbersContainer).toBeVisible();
         await expect(pages.adminBlockedNumbersPage.getBlockedNumberElement(reservation.phoneNumber)).toBeVisible();
     });
 
-        const reservationNewStartHour = reservation.startHour + 3;
-        const reservationNewEndHour = reservationNewStartHour + 2;
+    const reservationNewStartHour = reservation.startHour + 3;
+    const reservationNewEndHour = reservationNewStartHour + 2;
 
     await test.step('Go to create reservation with blocked number - the phone number error message should appear', async() => {
         await pages.adminLoginPage.goBackToUserPanel();
@@ -83,7 +83,7 @@ test('Blocking phone numbers from the Block-Number Page - works', async({page}) 
     });
 });
 
-test('Blocking phone numbers from the reservation details level - works', async({page}) => {
+test('Blocking phone number from the reservation details level - works', async() => {
 
     const userInfo = {
         bandName: 'details_of_music',
@@ -138,5 +138,57 @@ test('Blocking phone numbers from the reservation details level - works', async(
         await pages.reservationPage.fillTheFormAndCheckCheckbox('Tęczowa 57', 'Zespół', userInfo.bandName, userInfo.phoneNumber, reservationNewStartHour, reservationNewEndHour, userInfo.date);
         await pages.reservationPage.submitWithOnlinePayment();
         await pages.reservationPage.reservationForm.expectPhoneNumErrorMessageToBe(phoneNumErrorMessage);
+    });
+});
+
+test('Blocking phone number from the reservation`s settlement level - works', async() => {
+
+    const reservation = {
+        bandName: 'Sett-Band',
+        phoneNumber: await pages.reservationPage.reservationForm.generateRandomPhoneNumber(),
+        date: await pages.reservationPage.reservationForm.getSpecificDate('day after tomorrow'),
+        startHour: await pages.reservationPage.reservationForm.generateRandomHour(),
+    } as const;
+
+    const endHour = reservation.startHour + 2;
+    const reasonForBlocking = 'Zostawiają brudny lokal';
+
+    let reservationDate;
+    let reservationPrice;
+
+    await test.step('Create reservation and go to the settlement in Admin Panel', async() => {
+        await pages.reservationPage.fillTheFormAndCheckCheckbox('Browar Miesczanski', 'Nagrywka', reservation.bandName, reservation.phoneNumber, reservation.startHour, endHour, reservation.date);
+
+        reservationDate = await pages.reservationPage.reservationForm.getStartDateInputValue();
+        reservationPrice = await pages.reservationPage.getOnlineReservationPrice();
+
+        await pages.reservationPage.submitWithOnlinePayment();
+        await pages.phoneConfirmationPage.enterUserReservationCode();
+        await pages.phoneConfirmationPage.confirmAndGoToPrePayment();
+        await pages.prePaymentPage.enterEmailAddress();
+        await pages.prePaymentPage.goToPaymentMethod();
+        await pages.paymentMethodMenu.goToTransferPayment();
+        await pages.transferPage.selectIngBankTransfer();
+        await pages.bankPage.goToPay();
+        await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservationDate, reservation.startHour, reservation.bandName, false, false);
+
+        await pages.adminLoginPage.goToAdminPanel();
+        await pages.adminLoginPage.loginTheUser();
+        await pages.adminReservationPage.adminHeader.goToSettlement();
+    });
+
+    await test.step('Click to block the number - it should be possible to complete blocking in Block-Number Page', async() => {
+        await pages.adminSettlementPage.goToBlockNumber(reservation.bandName, reservationDate, reservation.startHour, reservation.phoneNumber);
+        await expect(pages.adminBlockedNumbersPage.blockedNumbersContainer).toBeVisible();
+        await pages.adminBlockedNumbersPage.expectBlockedPhoneNumberToBe(reservation.phoneNumber);
+        await pages.adminBlockedNumbersPage.expectBlockTypeToBeSelected('Zablokowany');
+        await pages.adminBlockedNumbersPage.enterBlockNumberReason(reasonForBlocking);
+        await pages.adminBlockedNumbersPage.confirmNumberBlocking();
+        await pages.adminBlockedNumbersPage.expectReservationDetailsOfBlockedNumberToBeVisible(reservation.phoneNumber, reservation.bandName, reservationDate, reservation.startHour, endHour, reservationPrice);
+    });
+
+    await test.step('Go back to Settlement - phone number on reservation details should be visible as blocked', async() => {
+        await pages.adminBlockedNumbersPage.adminHeader.goToSettlement();
+        await pages.adminSettlementPage.expectReservationToBeVisibleWithBlockedNumber(reservation.bandName, reservationDate, reservation.startHour, reservation.phoneNumber);
     });
 });
