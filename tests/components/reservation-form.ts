@@ -188,18 +188,11 @@ export class ReservationForm {
     public async expectSelectedTimeToBe(startHour: number, endHour: number) {
 
         const reservationHourSelector = this.page.locator('.MuiPickersSectionList-section').locator('[aria-label="Hours"]');
+        const formattedStartHour = String(startHour).padStart(2,'0');
+        const formattedEndHour = String(endHour).padStart(2,'0');
 
-        if (String(startHour).length === 1) {
-            await expect(reservationHourSelector.first()).toHaveText(`0${String(startHour)}`)
-        } else {
-            await expect(reservationHourSelector.first()).toHaveText(String(startHour));
-        }
-
-        if (String(endHour).length === 1) {
-            await expect(reservationHourSelector.last()).toHaveText(`0${String(endHour)}`)
-        } else {
-            await expect(reservationHourSelector.last()).toHaveText(String(endHour));
-        }
+        await expect(reservationHourSelector.first()).toHaveText(formattedStartHour);
+        await expect(reservationHourSelector.last()).toHaveText(formattedEndHour);
     }
 
     public async getSpecificDate(dayName: dayNameType) {

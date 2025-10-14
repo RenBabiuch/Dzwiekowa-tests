@@ -1,4 +1,4 @@
-import {Page} from "@playwright/test";
+import {expect, Page} from "@playwright/test";
 import {AdminHeader} from "../components/admin-header";
 
 type blockType = 'blocked' | 'enforce-online-payment';
@@ -55,15 +55,59 @@ export class AdminBlockedNumbersPagePO {
         return this.page.getByText('Obecnie zablokowane numery');
     }
 
-    public async blockedNumberElement(phoneNumber: string) {
-        return this.page.getByTestId(`blocked-row-+48${phoneNumber}`);
+    public getFormatPhoneNumberIfNeeded(phoneNumber: string) {
+
+        if(phoneNumber.includes(' ')) {
+            // @ts-ignore
+            return phoneNumber.replaceAll(' ', '');
+        } else {
+            return phoneNumber;
+        }
+    }
+
+    public getBlockedNumberElement(phoneNumber: string) {
+        const newFormatNumber = this.getFormatPhoneNumberIfNeeded(phoneNumber);
+        return this.page.getByTestId(`blocked-row-+48${newFormatNumber}`);
     }
 
     public unlockNumberButton(phoneNumber: string) {
-        return this.page.getByTestId(`unblock-+48${phoneNumber}`);
+        const newFormatNumber = this.getFormatPhoneNumberIfNeeded(phoneNumber);
+        return this.page.getByTestId(`unblock-+48${newFormatNumber}`);
     }
 
     public async unlockPhoneNumber(phoneNumber: string) {
         await this.unlockNumberButton(phoneNumber).click();
+    }
+
+    public getReservationDetailsOfBlockedNumberElement(phoneNumber: string) {
+        return (this.getBlockedNumberElement(phoneNumber)).locator('~ div.flex.gap-3');
+    }
+
+    public async expectBandNameOfBlockedNumberToBeVisible(phoneNumber: string, bandName: string) {
+        await expect(this.getReservationDetailsOfBlockedNumberElement(phoneNumber).getByText(bandName)).toBeVisible();
+    }
+
+    public async expectReservationDateAndHoursOfBlockedNumberToBeVisible(phoneNumber: string, date: string, startHour: number, endHour: number) {
+
+        const day = date.slice(8, 10);
+        const month = date.slice(5, 7);
+        const year = date.slice(0, 4);
+
+        await expect(this.getReservationDetailsOfBlockedNumberElement(phoneNumber).getByText(`${day}/${month}/${year}`)).toBeVisible();
+
+        const formattedStartHour = String(startHour).padStart(2,'0');
+        const formattedEndHour = String(endHour).padStart(2,'0');
+
+        await expect(this.getReservationDetailsOfBlockedNumberElement(phoneNumber).getByText(`${formattedStartHour}:00-${formattedEndHour}:00`)).toBeVisible();
+    }
+
+    public async expectReservationPriceOfBlockedNumberToBeVisible(phoneNumber: string, price: string) {
+        await expect(this.getReservationDetailsOfBlockedNumberElement(phoneNumber).getByText(price)).toBeVisible();
+    }
+
+    public async expectReservationDetailsOfBlockedNumberToBeVisible(phoneNumber: string, bandName: string, date: string, startHour: number, endHour: number, price: string) {
+        await this.expectBandNameOfBlockedNumberToBeVisible(phoneNumber, bandName);
+        await this.expectReservationDateAndHoursOfBlockedNumberToBeVisible(phoneNumber, date, startHour, endHour);
+        await this.expectReservationPriceOfBlockedNumberToBeVisible(phoneNumber, price);
     }
 }
