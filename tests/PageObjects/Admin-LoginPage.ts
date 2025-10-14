@@ -4,6 +4,16 @@ export class AdminLoginPagePO {
     constructor(private page: Page) {
     }
 
+    public async goToAdminPanel() {
+        await this.page.goto('#admin');
+        await this.page.reload();
+    }
+
+    public async goBackToUserPanel() {
+        await this.page.goto('');
+        await this.page.reload();
+    }
+
     public get passwordInput() {
         return this.page.getByTestId('password-input').locator('input');
     }

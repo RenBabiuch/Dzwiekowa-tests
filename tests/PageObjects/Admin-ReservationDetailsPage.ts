@@ -53,4 +53,12 @@ export class AdminReservationDetailsPagePO {
         });
         await this.cancelReservationWithoutRefundButton.click();
     }
+
+    public get blockNumberButton() {
+        return this.page.getByText('Zablokuj numer...');
+    }
+
+    public async blockPhoneNumber() {
+        await this.blockNumberButton.click();
+    }
 }

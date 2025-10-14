@@ -47,15 +47,15 @@ test.describe('Filters tests', async () => {
 
             await pages.adminReservationPage.reservationForm.submitWithCashPayment();
             await expect(pages.adminReservationPage.reservationForm.successfulReservationAlert).toBeVisible();
-            await pages.adminReservationPage.reservationForm.expectReservationToBeCreated(reservationDate, userInfo.startHour, reservation1.bandName);
+            await pages.adminReservationPage.reservationForm.expectReservationToBeCreated(reservationDate, userInfo.startHour, reservation1.bandName, true, true);
 
             await pages.adminReservationPage.reservationForm.enterDataToTheReservationForm('Stary Mlyn', 'Nagrywka', reservation2.bandName, reservation2.phoneNumber, userInfo.startHour, endHour, userInfo.date);
             await pages.adminReservationPage.reservationForm.submitWithCashPayment();
-            await pages.adminReservationPage.reservationForm.expectReservationToBeCreated(reservationDate, userInfo.startHour, reservation2.bandName);
+            await pages.adminReservationPage.reservationForm.expectReservationToBeCreated(reservationDate, userInfo.startHour, reservation2.bandName, true, true);
 
             await pages.adminReservationPage.reservationForm.enterDataToTheReservationForm('Tęczowa 57', 'Zespół', reservation3.bandName, reservation3.phoneNumber, userInfo.startHour, endHour, userInfo.date);
             await pages.adminReservationPage.reservationForm.submitWithCashPayment();
-            await pages.adminReservationPage.reservationForm.expectReservationToBeCreated(reservationDate, userInfo.startHour, reservation3.bandName);
+            await pages.adminReservationPage.reservationForm.expectReservationToBeCreated(reservationDate, userInfo.startHour, reservation3.bandName, true, true);
         });
 
         await test.step('When reservationType is selected, only relevant reservations should be displayed', async() => {
