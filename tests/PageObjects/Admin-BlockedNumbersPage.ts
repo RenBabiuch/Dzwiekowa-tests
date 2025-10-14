@@ -1,7 +1,12 @@
 import {expect, Page} from "@playwright/test";
 import {AdminHeader} from "../components/admin-header";
 
-type blockType = 'blocked' | 'enforce-online-payment';
+const blockTypePolToEngNameMap = {
+     'Zablokowany': 'blocked',
+     'Wymuś płatność online': 'only_online'
+} as const;
+
+type blockType = keyof typeof blockTypePolToEngNameMap;
 
 export class AdminBlockedNumbersPagePO {
     constructor(private page: Page) {
@@ -9,23 +14,30 @@ export class AdminBlockedNumbersPagePO {
 
     adminHeader = new AdminHeader(this.page);
 
-    public get blockNumberInput() {
+    public get blockPhoneNumberInput() {
         return this.page.getByTestId('block-new-number').last().locator('input');
     }
 
-    public async enterNumberToBlock(phoneNumber: string) {
-        await this.blockNumberInput.fill(phoneNumber);
+    public async enterPhoneNumberToBlock(phoneNumber: string) {
+        await this.blockPhoneNumberInput.fill(phoneNumber);
+    }
+
+    public async expectBlockedPhoneNumberToBe(phoneNumber: string) {
+        const newFormatNumber = this.getFormatPhoneNumberIfNeeded(phoneNumber);
+        await expect(this.blockPhoneNumberInput).toHaveValue(`+48${newFormatNumber}`);
+    }
+
+    public get blockTypeCombobox() {
+        return this.page.getByTestId('block-new-type').nth(1);
+    }
+
+    public async expectBlockTypeToBeSelected(blockName: blockType) {
+        await expect(this.blockTypeCombobox.locator('input')).toHaveValue(blockTypePolToEngNameMap[blockName]);
     }
 
     public async selectBlockType(blockName: blockType) {
-
-        const engToPolishNameMap = {
-            'blocked': 'Zablokowany',
-            'enforce-online-payment': 'Wymuś płatność online'
-        }
-
-        await this.page.getByTestId('block-new-type').first().click();
-        await this.page.getByRole('listbox').getByText(engToPolishNameMap[blockName]).click();
+        await this.blockTypeCombobox.click();
+        await this.page.getByRole('listbox').getByText(blockName).click();
     }
 
     public get blockNumberReasonInput() {
@@ -37,7 +49,7 @@ export class AdminBlockedNumbersPagePO {
     }
 
     public async fillAndConfirmBlockNumberForm(phoneNumber: string, blockName: blockType, reason: string) {
-        await this.enterNumberToBlock(phoneNumber);
+        await this.enterPhoneNumberToBlock(phoneNumber);
         await this.selectBlockType(blockName);
         await this.enterBlockNumberReason(reason);
         await this.confirmNumberBlocking();
@@ -105,9 +117,9 @@ export class AdminBlockedNumbersPagePO {
         await expect(this.getReservationDetailsOfBlockedNumberElement(phoneNumber).getByText(price)).toBeVisible();
     }
 
-    public async expectReservationDetailsOfBlockedNumberToBeVisible(phoneNumber: string, bandName: string, date: string, startHour: number, endHour: number, price: string) {
+    public async expectReservationDetailsOfBlockedNumberToBeVisible(phoneNumber: string, bandName: string, inputDate: string, startHour: number, endHour: number, price: string) {
         await this.expectBandNameOfBlockedNumberToBeVisible(phoneNumber, bandName);
-        await this.expectReservationDateAndHoursOfBlockedNumberToBeVisible(phoneNumber, date, startHour, endHour);
+        await this.expectReservationDateAndHoursOfBlockedNumberToBeVisible(phoneNumber, inputDate, startHour, endHour);
         await this.expectReservationPriceOfBlockedNumberToBeVisible(phoneNumber, price);
     }
 }
