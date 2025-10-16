@@ -3,7 +3,7 @@ import {AdminHeader} from "../components/admin-header";
 import {Calendar} from "../components/calendar";
 import {AdminFilters} from "../components/admin-filters";
 import {ReservationForm} from "../components/reservation-form";
-import {AdminCheckboxes} from "../components/admin-checkboxes";
+import {Checkboxes} from "../components/checkboxes";
 
 type checkboxNameType = 'sendConfirmationSMS' | 'sendTrialCodeSMS' | 'calculateReservationCost';
 
@@ -15,12 +15,10 @@ export class AdminReservationPagePO {
     calendar = new Calendar(this.page);
     filters = new AdminFilters(this.page);
     reservationForm = new ReservationForm(this.page);
-    private checkboxes = new AdminCheckboxes(this.page);
-
-     checkboxNameToLabelSelectorMap = {
-        'sendConfirmationSMS': this.checkboxes.sendConfirmationSMSLabelSelector,
-        'sendTrialCodeSMS': this.checkboxes.sendTrialCodeSMSLabelSelector,
-        'calculateReservationCost': this.checkboxes.calculateReservationCostLabelSelector,
+    private checkboxes = {
+        'sendConfirmationSMS': new Checkboxes(this.page, 'Wyślij SMS potwierdzający'),
+        'sendTrialCodeSMS': new Checkboxes(this.page, 'Wyślij SMS z kodem na próbę'),
+        'calculateReservationCost': new Checkboxes(this.page, 'Wylicz koszt rezerwacji')
     } as const;
 
     public get calendarElement() {
@@ -28,11 +26,11 @@ export class AdminReservationPagePO {
     }
 
     public async expectCheckboxElementToBeVisible(checkboxName: checkboxNameType) {
-        await expect(this.checkboxes.getCheckboxElement(this.checkboxNameToLabelSelectorMap[checkboxName])).toBeVisible();
+        await expect(this.checkboxes[checkboxName].getCheckboxElement()).toBeVisible();
     }
 
     public async ensureCheckboxIsUnchecked(checkboxName: checkboxNameType) {
         await this.expectCheckboxElementToBeVisible(checkboxName);
-        await this.checkboxes.expectCheckboxToBeUnchecked(this.checkboxNameToLabelSelectorMap[checkboxName]);
+        await this.checkboxes[checkboxName].expectCheckboxToBeUnchecked();
     }
 }
