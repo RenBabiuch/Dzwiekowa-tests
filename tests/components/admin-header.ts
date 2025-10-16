@@ -47,4 +47,12 @@ export class AdminHeader {
     public async goToNotepad() {
         await this.notepadButton.click();
     }
+
+    public get settlementButton() {
+        return this.page.getByTestId('reservation-list');
+    }
+
+    public async goToSettlement() {
+        await this.settlementButton.click();
+    }
 }

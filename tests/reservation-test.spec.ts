@@ -72,7 +72,7 @@ test.describe('Reservation tests', async () => {
             await pages.paymentMethodMenu.goToTransferPayment();
             await pages.transferPage.selectIngBankTransfer();
             await pages.bankPage.goToPay();
-            await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservationDate, generated.startHour, reservation.bandName, false);
+            await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservationDate, generated.startHour, reservation.bandName);
         });
     });
 });
@@ -177,7 +177,7 @@ test('Unsuccessful creating a reservation for an already booked date', async () 
         await pages.paymentMethodMenu.goToTransferPayment();
         await pages.transferPage.selectIngBankTransfer();
         await pages.bankPage.goToPay();
-        await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservationDate, generated.startHour, reservation.bandName1, false);
+        await pages.reservationPage.reservationForm.expectReservationToBeCreated(reservationDate, generated.startHour, reservation.bandName1);
     });
 
     await test.step('After creating a reservation for the same - already booked - date, an error message should appear', async () => {
