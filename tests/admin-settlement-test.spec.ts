@@ -22,7 +22,7 @@ test('Calculate-reservation-cost checkbox works', async({page}) => {
 
     const endHour = userInfo.startHour + 5;
     let startDate = '';
-    const reservationCost = '0zł'
+    const reservationCost = '0zł';
 
     test.slow();
 

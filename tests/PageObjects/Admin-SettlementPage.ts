@@ -1,5 +1,6 @@
 import {expect, Page} from "@playwright/test";
 import {AdminHeader} from "../components/admin-header";
+import {FormatDateAndTime} from "../components/format-date-and-time";
 
 const headerNameToIndexMap = {
     'Sala': '0',
@@ -25,6 +26,7 @@ export class AdminSettlementPagePO {
     }
 
     header = new AdminHeader(this.page);
+    formatDateAndTime = new FormatDateAndTime(this.page);
 
     tableHeaderElement = this.page.locator('.MuiTableHead-root');
     tableReservationRowElementSelector = 'tr.MuiTableRow-root[data-index]';
@@ -90,17 +92,9 @@ export class AdminSettlementPagePO {
             await expect(reservationRowIndex.locator(`[data-index="${headerNameToIndexMap[reservationParameter]}"]`)).toHaveText(`+48 ${expectedValue}`);
         } else if (reservationParameter === 'Czas rezerwacji') {
             const formattedDate = this.getFormatDate(expectedValue);
+            const startAndEndHours = this.formatDateAndTime.getFormattedHours(startHour, endHour);
 
-            let startHourString = String(startHour);
-            let endHourString = String(endHour);
-
-            if (startHourString.length === 1) {
-                startHourString = '0' + startHour;
-            }
-            if (endHourString.length === 1) {
-                endHourString = '0' + endHour;
-            }
-            await expect(reservationRowIndex.locator(`[data-index="${headerNameToIndexMap[reservationParameter]}"]`)).toContainText(`${formattedDate}, ${startHourString}:00-${endHourString}:00`);
+            await expect(reservationRowIndex.locator(`[data-index="${headerNameToIndexMap[reservationParameter]}"]`)).toContainText(`${formattedDate}, ${startAndEndHours}`);
         } else if (reservationParameter === 'Opłacone') {
             await expect(reservationRowIndex.locator(`[data-index="${headerNameToIndexMap[reservationParameter]}"] input`)).toHaveValue(expectedValue);
         } else if (reservationParameter === 'Status') {

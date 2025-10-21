@@ -1,5 +1,6 @@
 import {expect, Page} from "@playwright/test";
 import {AdminHeader} from "../components/admin-header";
+import {FormatDateAndTime} from "../components/format-date-and-time";
 
 const blockTypePolToEngNameMap = {
      'Zablokowany': 'blocked',
@@ -13,6 +14,7 @@ export class AdminBlockedNumbersPagePO {
     }
 
     adminHeader = new AdminHeader(this.page);
+    formatDateAndTime = new FormatDateAndTime(this.page);
 
     public get blockPhoneNumberInput() {
         return this.page.getByTestId('block-new-number').last().locator('input');
@@ -105,12 +107,9 @@ export class AdminBlockedNumbersPagePO {
         const month = date.slice(5, 7);
         const year = date.slice(0, 4);
 
+        const formattedStartAndEndHours = this.formatDateAndTime.getFormattedHours(startHour, endHour);
         await expect(this.getReservationDetailsOfBlockedNumberElement(phoneNumber).getByText(`${day}/${month}/${year}`)).toBeVisible();
-
-        const formattedStartHour = String(startHour).padStart(2,'0');
-        const formattedEndHour = String(endHour).padStart(2,'0');
-
-        await expect(this.getReservationDetailsOfBlockedNumberElement(phoneNumber).getByText(`${formattedStartHour}:00-${formattedEndHour}:00`)).toBeVisible();
+        await expect(this.getReservationDetailsOfBlockedNumberElement(phoneNumber).getByText(`${formattedStartAndEndHours}`)).toBeVisible();
     }
 
     public async expectReservationPriceOfBlockedNumberToBeVisible(phoneNumber: string, price: string) {
