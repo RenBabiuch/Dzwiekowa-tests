@@ -1,6 +1,7 @@
 import {expect, Page} from "@playwright/test";
 import {AdminHeader} from "../components/admin-header";
-import {FormatDateAndTime} from "../components/format-date-and-time";
+import {getFormattedDate} from "../utils/date-format";
+import {getFormattedHours} from "../utils/time-format";
 
 const headerNameToIndexMap = {
     'Sala': '0',
@@ -26,7 +27,6 @@ export class AdminSettlementPagePO {
     }
 
     header = new AdminHeader(this.page);
-    formatDateAndTime = new FormatDateAndTime(this.page);
 
     tableHeaderElement = this.page.locator('.MuiTableHead-root');
     tableReservationRowElementSelector = 'tr.MuiTableRow-root[data-index]';
@@ -53,29 +53,21 @@ export class AdminSettlementPagePO {
         }
     }
 
-    public getFormatDate(inputDate: string) {
-        const day = inputDate.slice(8, 10);
-        const month = inputDate.slice(5, 7);
-        const year = inputDate.slice(0, 4);
-
-        return `${day}/${month}/${year}`;
-    }
-
     public async getFilteredReservationRow(bandName: string, date: string, startHour: number, phoneNumber: string) {
         await this.filterReservationsBy('Zespół', bandName);
         await expect(this.page.locator(this.filteredResultsContainerSelector)).toBeVisible();
         const filteredBandReservationRowSelector = `${this.filteredResultsContainerSelector} tr`;
 
-        const formattedDate = this.getFormatDate(date);
-        let startHourString = String(startHour).padStart(2,'0');
+        const formattedDate = getFormattedDate(date);
+        const formattedStartHour = getFormattedHours(startHour);
 
         const bandReservations = await this.page.locator(filteredBandReservationRowSelector).all();
 
         for(let bandReservation of bandReservations) {
         await expect(bandReservation).toContainText(bandName);
             let bandReservationText = await bandReservation.innerText();
-                if (bandReservationText.includes(`${formattedDate}, ${startHourString}:00-`)) {
-                    await expect(bandReservation).toContainText(`${formattedDate}, ${startHourString}:00-`);
+                if (bandReservationText.includes(`${formattedDate}, ${formattedStartHour}`)) {
+                    await expect(bandReservation).toContainText(`${formattedDate}, ${formattedStartHour}`);
                     await expect(bandReservation).toContainText(`+48 ${phoneNumber}`);
                     const reservationRowIndex = await bandReservation.getAttribute('data-index');
                     return this.page.locator(`${filteredBandReservationRowSelector}[data-index="${reservationRowIndex}"]`);
@@ -91,10 +83,10 @@ export class AdminSettlementPagePO {
         if (reservationParameter === 'Telefon') {
             await expect(reservationRowIndex.locator(`[data-index="${headerNameToIndexMap[reservationParameter]}"]`)).toHaveText(`+48 ${expectedValue}`);
         } else if (reservationParameter === 'Czas rezerwacji') {
-            const formattedDate = this.getFormatDate(expectedValue);
-            const startAndEndHours = this.formatDateAndTime.getFormattedHours(startHour, endHour);
+            const formattedDate = getFormattedDate(expectedValue);
+            const formattedStartAndEndHours = getFormattedHours(startHour, endHour);
 
-            await expect(reservationRowIndex.locator(`[data-index="${headerNameToIndexMap[reservationParameter]}"]`)).toContainText(`${formattedDate}, ${startAndEndHours}`);
+            await expect(reservationRowIndex.locator(`[data-index="${headerNameToIndexMap[reservationParameter]}"]`)).toContainText(`${formattedDate}, ${formattedStartAndEndHours}`);
         } else if (reservationParameter === 'Opłacone') {
             await expect(reservationRowIndex.locator(`[data-index="${headerNameToIndexMap[reservationParameter]}"] input`)).toHaveValue(expectedValue);
         } else if (reservationParameter === 'Status') {
