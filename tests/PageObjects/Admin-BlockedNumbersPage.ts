@@ -2,7 +2,7 @@ import {expect, Page} from "@playwright/test";
 import {AdminHeader} from "../components/admin-header";
 import {getFormattedDate} from "../utils/date-format";
 import {getFormattedHours} from "../utils/time-format";
-import {removeSpacesFromPhoneNumberIfNeeded} from "../utils/phone-number-format";
+import {removeSpacesFromPhoneNumber} from "../utils/phone-number-format";
 
 const blockTypePolToEngNameMap = {
      'Zablokowany': 'blocked',
@@ -26,7 +26,7 @@ export class AdminBlockedNumbersPagePO {
     }
 
     public async expectBlockedPhoneNumberToBe(phoneNumber: string) {
-        const formattedPhoneNumber = removeSpacesFromPhoneNumberIfNeeded(phoneNumber);
+        const formattedPhoneNumber = removeSpacesFromPhoneNumber(phoneNumber);
         await expect(this.blockPhoneNumberInput).toHaveValue(`+48${formattedPhoneNumber}`);
     }
 
@@ -71,12 +71,12 @@ export class AdminBlockedNumbersPagePO {
     }
 
     public getBlockedNumberElement(phoneNumber: string) {
-        const formattedPhoneNumber = removeSpacesFromPhoneNumberIfNeeded(phoneNumber);
+        const formattedPhoneNumber = removeSpacesFromPhoneNumber(phoneNumber);
         return this.page.getByTestId(`blocked-row-+48${formattedPhoneNumber}`);
     }
 
     public unlockNumberButton(phoneNumber: string) {
-        const formattedPhoneNumber = removeSpacesFromPhoneNumberIfNeeded(phoneNumber);
+        const formattedPhoneNumber = removeSpacesFromPhoneNumber(phoneNumber);
         return this.page.getByTestId(`unblock-+48${formattedPhoneNumber}`);
     }
 
