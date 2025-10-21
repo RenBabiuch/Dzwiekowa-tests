@@ -2,6 +2,7 @@ import {expect, Page} from "@playwright/test";
 import {AdminHeader} from "../components/admin-header";
 import {getFormattedDate} from "../utils/date-format";
 import {getFormattedHours} from "../utils/time-format";
+import {removeSpacesFromPhoneNumberIfNeeded} from "../utils/phone-number-format";
 
 const blockTypePolToEngNameMap = {
      'Zablokowany': 'blocked',
@@ -25,8 +26,8 @@ export class AdminBlockedNumbersPagePO {
     }
 
     public async expectBlockedPhoneNumberToBe(phoneNumber: string) {
-        const newFormatNumber = this.getFormatPhoneNumberIfNeeded(phoneNumber);
-        await expect(this.blockPhoneNumberInput).toHaveValue(`+48${newFormatNumber}`);
+        const formattedPhoneNumber = removeSpacesFromPhoneNumberIfNeeded(phoneNumber);
+        await expect(this.blockPhoneNumberInput).toHaveValue(`+48${formattedPhoneNumber}`);
     }
 
     public get blockTypeCombobox() {
@@ -69,24 +70,14 @@ export class AdminBlockedNumbersPagePO {
         return this.page.getByText('Obecnie zablokowane numery');
     }
 
-    public getFormatPhoneNumberIfNeeded(phoneNumber: string) {
-
-        if(phoneNumber.includes(' ')) {
-            // @ts-ignore
-            return phoneNumber.replaceAll(' ', '');
-        } else {
-            return phoneNumber;
-        }
-    }
-
     public getBlockedNumberElement(phoneNumber: string) {
-        const newFormatNumber = this.getFormatPhoneNumberIfNeeded(phoneNumber);
-        return this.page.getByTestId(`blocked-row-+48${newFormatNumber}`);
+        const formattedPhoneNumber = removeSpacesFromPhoneNumberIfNeeded(phoneNumber);
+        return this.page.getByTestId(`blocked-row-+48${formattedPhoneNumber}`);
     }
 
     public unlockNumberButton(phoneNumber: string) {
-        const newFormatNumber = this.getFormatPhoneNumberIfNeeded(phoneNumber);
-        return this.page.getByTestId(`unblock-+48${newFormatNumber}`);
+        const formattedPhoneNumber = removeSpacesFromPhoneNumberIfNeeded(phoneNumber);
+        return this.page.getByTestId(`unblock-+48${formattedPhoneNumber}`);
     }
 
     public async unlockPhoneNumber(phoneNumber: string) {
