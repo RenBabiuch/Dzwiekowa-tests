@@ -1,6 +1,7 @@
 import {expect, Page} from "@playwright/test";
 import {AdminHeader} from "../components/admin-header";
-import {FormatDateAndTime} from "../components/format-date-and-time";
+import {getFormattedDate} from "../utils/date-format";
+import {getFormattedHours} from "../utils/time-format";
 
 const headerNameToIndexMap = {
     'Sala': '0',
@@ -26,10 +27,10 @@ export class AdminSettlementPagePO {
     }
 
     header = new AdminHeader(this.page);
-    formatDateAndTime = new FormatDateAndTime(this.page);
 
     tableHeaderElement = this.page.locator('.MuiTableHead-root');
     tableReservationRowElementSelector = 'tr.MuiTableRow-root[data-index]';
+    filteredResultsContainerSelector = '.MuiTableBody-root';
     settlementElement = this.page.locator('.flex-col.gap-8');
 
     public get headerElement() {
@@ -40,7 +41,7 @@ export class AdminSettlementPagePO {
         return this.tableHeaderElement.locator(`[data-index="${headerNameToIndexMap[headerName]}"]`);
     }
 
-    public async getReservationRowByBandName(bandName: string) {
+    public async getReservationRow(bandName: string) {
         const allRowElements = await this.page.locator(this.tableReservationRowElementSelector).all();
 
         for (let rowElement of allRowElements) {
@@ -52,19 +53,40 @@ export class AdminSettlementPagePO {
         }
     }
 
+    public async getFilteredReservationRow(bandName: string, date: string, startHour: number, phoneNumber: string) {
+        await this.filterReservationsBy('Zespół', bandName);
+        await expect(this.page.locator(this.filteredResultsContainerSelector)).toBeVisible();
+        const filteredBandReservationRowSelector = `${this.filteredResultsContainerSelector} tr`;
+
+        const formattedDate = getFormattedDate(date);
+        const formattedStartHour = getFormattedHours(startHour);
+
+        const bandReservations = await this.page.locator(filteredBandReservationRowSelector).all();
+
+        for(let bandReservation of bandReservations) {
+        await expect(bandReservation).toContainText(bandName);
+            let bandReservationText = await bandReservation.innerText();
+                if (bandReservationText.includes(`${formattedDate}, ${formattedStartHour}`)) {
+                    await expect(bandReservation).toContainText(`${formattedDate}, ${formattedStartHour}`);
+                    await expect(bandReservation).toContainText(`+48 ${phoneNumber}`);
+                    const reservationRowIndex = await bandReservation.getAttribute('data-index');
+                    return this.page.locator(`${filteredBandReservationRowSelector}[data-index="${reservationRowIndex}"]`);
+                } else {
+                    console.log('Found results: Reservation doesn\'t exist');
+            }
+        }
+    }
+
     public async expectReservationParameterToHaveValue(bandName: string, reservationParameter: headerNameType, expectedValue: string, startHour?: number, endHour?: number) {
-        const reservationRowIndex = await this.getReservationRowByBandName(bandName);
+        const reservationRowIndex = await this.getReservationRow(bandName);
 
         if (reservationParameter === 'Telefon') {
             await expect(reservationRowIndex.locator(`[data-index="${headerNameToIndexMap[reservationParameter]}"]`)).toHaveText(`+48 ${expectedValue}`);
         } else if (reservationParameter === 'Czas rezerwacji') {
-            const day = expectedValue.slice(8, 10);
-            const month = expectedValue.slice(5, 7);
-            const year = expectedValue.slice(0, 4);
+            const formattedDate = getFormattedDate(expectedValue);
+            const formattedStartAndEndHours = getFormattedHours(startHour, endHour);
 
-            const startAndEndHours = this.formatDateAndTime.getFormattedHours(startHour, endHour);
-
-            await expect(reservationRowIndex.locator(`[data-index="${headerNameToIndexMap[reservationParameter]}"]`)).toContainText(`${day}/${month}/${year}, ${startAndEndHours}`);
+            await expect(reservationRowIndex.locator(`[data-index="${headerNameToIndexMap[reservationParameter]}"]`)).toContainText(`${formattedDate}, ${formattedStartAndEndHours}`);
         } else if (reservationParameter === 'Opłacone') {
             await expect(reservationRowIndex.locator(`[data-index="${headerNameToIndexMap[reservationParameter]}"] input`)).toHaveValue(expectedValue);
         } else if (reservationParameter === 'Status') {
@@ -123,5 +145,19 @@ export class AdminSettlementPagePO {
             const currentPaymentStatus = selectedPaymentTypeForRoomElement.locator('div').last();
             await expect(currentPaymentStatus).toContainText(`${paymentStatus}${expectedValue}`);
         }
+    }
+
+    public get blockNumberButton() {
+        return this.page.locator('a').getByText('Zablokuj');
+    }
+
+    public async goToBlockNumber(bandName: string, date: string, startHour: number, phoneNumber: string) {
+        const foundReservation = await this.getFilteredReservationRow(bandName, date, startHour, phoneNumber);
+        await foundReservation.locator(this.blockNumberButton).click();
+    }
+
+    public async expectReservationToBeVisibleWithBlockedNumber(bandName: string, date: string, startHour: number, phoneNumber: string) {
+        const foundReservation = await this.getFilteredReservationRow(bandName, date, startHour, phoneNumber);
+        await expect(foundReservation.locator(this.blockNumberButton)).toHaveAttribute('aria-disabled', 'true');
     }
 }

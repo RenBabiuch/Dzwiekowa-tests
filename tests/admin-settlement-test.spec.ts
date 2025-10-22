@@ -22,7 +22,7 @@ test('Calculate-reservation-cost checkbox works', async({page}) => {
 
     const endHour = userInfo.startHour + 5;
     let startDate = '';
-    const reservationCost = '0zł'
+    const reservationCost = '0zł';
 
     test.slow();
 
@@ -48,7 +48,7 @@ test('Calculate-reservation-cost checkbox works', async({page}) => {
         await expect(pages.adminSettlementPage.tableHeaderElement).toBeVisible();
 
         await pages.adminSettlementPage.filterReservationsBy('Zespół', userInfo.bandName);
-        await expect(await pages.adminSettlementPage.getReservationRowByBandName(userInfo.bandName)).toBeVisible();
+        await expect(await pages.adminSettlementPage.getReservationRow(userInfo.bandName)).toBeVisible();
         await pages.adminSettlementPage.expectReservationParameterToHaveValue(userInfo.bandName, 'Zespół', userInfo.bandName);
         await pages.adminSettlementPage.expectReservationParameterToHaveValue(userInfo.bandName, 'Telefon', userInfo.phoneNumber);
         await pages.adminSettlementPage.expectReservationParameterToHaveValue(userInfo.bandName, 'Czas rezerwacji', startDate, userInfo.startHour, endHour);
