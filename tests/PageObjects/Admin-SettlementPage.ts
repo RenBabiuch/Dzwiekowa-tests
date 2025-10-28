@@ -2,6 +2,7 @@ import {expect, Page} from "@playwright/test";
 import {AdminHeader} from "../components/admin-header";
 import {getFormattedDate} from "../utils/date-format";
 import {getFormattedHours} from "../utils/time-format";
+import {roomNameType} from "./Admin-ManageRoomsPage";
 
 const headerNameToIndexMap = {
     'Sala': '0',
@@ -19,7 +20,7 @@ const headerNameToIndexMap = {
 
 type headerNameType = keyof typeof headerNameToIndexMap;
 
-type roomNameType = 'Browar' | 'Młyn' | 'Tęczowa 57';
+// type roomNameType = 'Browar' | 'Młyn' | 'Tęczowa 57';
 type roomSettlementType = roomNameType | 'Całość';
 
 export class AdminSettlementPagePO {
