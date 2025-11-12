@@ -9,6 +9,13 @@ test.beforeEach(async({page}) => {
     await pages.adminLoginPage.loginTheUser();
 });
 
+test.use({
+    viewport: {
+        width: 1280,
+        height: 1280,
+    },
+});
+
 test.describe('Filters tests', async () => {
 
     // The payment-type selector has been tested in the payment-test already
