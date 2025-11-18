@@ -1,30 +1,56 @@
-import {expect, Page} from "@playwright/test";
+import {expect, Locator, Page} from "@playwright/test";
+
+export type checkboxStateType = 'checked' | 'unchecked';
 
 export class Checkboxes {
-    constructor(private page: Page, private label: string) {
+    constructor(private page: Page, private toggleElement: string | Locator) {
     }
 
-    checkedCheckboxClass = '.Mui-checked';
+    selectedCheckboxClass = '.Mui-checked';
 
-    private get labelSelector() {
-        return this.page.getByLabel(this.label);
+    public get selectedCheckboxLocator() {
+        if (typeof this.toggleElement === 'string') {
+            return this.page.locator(this.toggleElement + this.selectedCheckboxClass);
+        } else {
+            return this.toggleElement.locator(`span${this.selectedCheckboxClass}`);
+        }
     }
 
-    public getCheckboxElement() {
-        return this.page.locator('label').filter({has: this.labelSelector}).locator('span').first();
-    }
-
-    public async isCheckboxChecked() {
-        const checkedCheckboxClassIsVisible = await this.getCheckboxElement().locator(this.checkedCheckboxClass).isVisible();
-        if (checkedCheckboxClassIsVisible) {
+    public async isCheckboxSelected() {
+        if (await this.selectedCheckboxLocator.isVisible()) {
             return true;
         }
     }
 
-    public async expectCheckboxToBeUnchecked() {
-        if (await this.isCheckboxChecked()) {
-            await this.getCheckboxElement().click();
+    public async ensureCheckboxStateToBe(state: checkboxStateType) {
+        let toggleCheckbox;
+
+        if (typeof this.toggleElement === 'string') {
+            toggleCheckbox = this.page.locator(this.toggleElement + ' [role="switch"]');
+        } else {
+            toggleCheckbox = this.toggleElement.locator('[role="switch"]');
         }
-        await expect(this.getCheckboxElement()).not.toHaveClass('.Mui-checked');
+
+        if (state === 'checked') {
+            if (!await this.isCheckboxSelected()) {
+                await toggleCheckbox.click();
+            }
+            await expect(toggleCheckbox).toBeChecked();
+        }
+        if (state === 'unchecked') {
+            if (await this.isCheckboxSelected()) {
+                await toggleCheckbox.click();
+            }
+            await expect(toggleCheckbox).not.toBeChecked();
+        }
+    }
+
+    public async expectCheckboxStateToBe(expectedState: checkboxStateType) {
+        if (expectedState === 'checked') {
+            await expect(this.selectedCheckboxLocator).toBeVisible();
+        }
+        if (expectedState === 'unchecked') {
+            await expect(this.selectedCheckboxLocator).toBeHidden();
+        }
     }
 }

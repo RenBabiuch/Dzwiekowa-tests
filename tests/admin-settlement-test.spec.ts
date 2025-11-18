@@ -11,6 +11,13 @@ test.beforeEach('Go to the Admin Panel', async({page}) => {
     await pages.adminLoginPage.loginTheUser();
 });
 
+    test.use({
+        viewport: {
+            width: 1280,
+            height: 1280,
+        },
+    });
+
 test('Calculate-reservation-cost checkbox works', async({page}) => {
 
     const userInfo = {
@@ -20,7 +27,7 @@ test('Calculate-reservation-cost checkbox works', async({page}) => {
         startHour: await pages.adminReservationPage.reservationForm.generateRandomHour(),
     } as const;
 
-    const endHour = userInfo.startHour + 5;
+    const endHour = userInfo.startHour + 2;
     let startDate = '';
     const reservationCost = '0zł';
 
@@ -29,8 +36,13 @@ test('Calculate-reservation-cost checkbox works', async({page}) => {
     await test.step('Make a cash reservation with unchecked calculate-reservation-cost checkbox', async() => {
         await pages.adminReservationPage.reservationForm.enterDataToTheReservationForm('Stary Mlyn', 'Nagrywka', userInfo.bandName, userInfo.phoneNumber, userInfo.startHour, endHour, userInfo.date);
         startDate = await pages.adminReservationPage.reservationForm.getStartDateInputValue();
-        await pages.adminReservationPage.expectCheckboxElementToBeVisible('calculateReservationCost');
-        await pages.adminReservationPage.ensureCheckboxIsUnchecked('calculateReservationCost');
+        await pages.adminReservationPage.expectReservationFormFeatureStateToBe('sendConfirmationSMS', 'checked');
+        await pages.adminReservationPage.expectReservationFormFeatureStateToBe('sendTrialCodeSMS', 'checked');
+        await pages.adminReservationPage.expectReservationFormFeatureStateToBe('calculateReservationCost', 'checked');
+
+        await pages.adminReservationPage.ensureReservationFormFeatureStateToBe('calculateReservationCost', 'unchecked');
+        await pages.adminReservationPage.expectReservationFormFeatureStateToBe('calculateReservationCost', 'unchecked');
+
         await pages.adminReservationPage.reservationForm.submitWithCashPayment();
         await pages.adminReservationPage.reservationForm.expectReservationToBeCreated(startDate, userInfo.startHour, userInfo.bandName, true, true);
     });

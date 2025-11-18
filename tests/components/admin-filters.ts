@@ -1,6 +1,7 @@
 import {Page} from "@playwright/test";
 
 type reservationScopeType = 'Aktywne' | 'Oczekujące potwierdzenia' | 'Wygasłe' | 'Anulowane';
+export type adminReservationType = 'Wszystkie' | 'Solo' | 'Zespół' | 'Solo z talerzami' | 'Nagrywka' | 'Lekcja/Duet' | 'Próba 5+więcej';
 
 export class AdminFilters {
     constructor(private page: Page) {
